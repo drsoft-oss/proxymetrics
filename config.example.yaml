@@ -1,0 +1,32 @@
+# ProxyMetrics — core proxy + storage configuration
+
+server:
+  proxy_listen: ":8080"
+  api_listen:   ":8081"
+  deployment_secret: "${PROXYMETRICS_SECRET}"   # set via env
+
+storage:
+  data_dir: "./data"
+
+events:
+  channel_size: 10000
+  batch_size: 500
+  flush_interval: "1s"
+
+shutdown:
+  drain_timeout: "30s"
+
+defaults:
+  team: "default"
+  project: "default"
+
+ipcheck:
+  apis:
+    - "https://api.ipify.org?format=json"
+    - "https://ifconfig.me/all.json"
+    - "https://icanhazip.com"
+  rotation: "round_robin"
+
+logging:
+  level: "info"     # debug|info|warn|error
+  format: "auto"    # auto|text|json

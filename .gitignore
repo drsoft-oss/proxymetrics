@@ -1,0 +1,34 @@
+/bin/
+/data/
+*.duckdb
+*.duckdb.wal
+.env
+.env.local
+.DS_Store
+/coverage.out
+
+# UI build artifacts
+/internal/ui/ui-dist/*
+!/internal/ui/ui-dist/index.html
+/ui/node_modules/
+/ui/dist/
+/ui/.vite/
+
+# Brainstorming companion session files
+/.superpowers/
+/docs/superpowers/
+
+# Git worktrees
+/.worktrees/
+
+# Local scratch / build logs
+/tmp/
+
+# Editor + local history
+/.vscode/
+/.history/
+
+# AI tooling state
+/.agents/
+/.claude/
+/skills-lock.json

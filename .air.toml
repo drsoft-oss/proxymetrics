@@ -1,0 +1,21 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./bin/proxymetrics ./cmd/proxymetrics"
+  bin = "./bin/proxymetrics"
+  full_bin = "PROXYMETRICS_SECRET=devsecret ./bin/proxymetrics serve -c config.example.yaml"
+  include_ext = ["go", "yaml"]
+  exclude_dir = ["ui", "internal/ui/ui-dist", "bin", "data", "tmp", "test", ".superpowers"]
+  delay = 500
+  stop_on_error = true
+
+[log]
+  time = true
+
+[color]
+  app = ""
+  build = "yellow"
+  main = "magenta"
+  runner = "green"
+  watcher = "cyan"
