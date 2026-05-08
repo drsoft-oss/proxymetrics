@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
-	"github.com/anonymous-proxies/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
 )
 
 func TestE2E_BackupRestore_RoundTrip(t *testing.T) {

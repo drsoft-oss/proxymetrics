@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/test/integration"
+	"github.com/drsoft-oss/proxymetrics/test/integration"
 )
 
 func TestE2E_SSEStream_DeliversLiveEvents(t *testing.T) {

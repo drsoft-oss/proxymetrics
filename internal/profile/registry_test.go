@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/profile"
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/profile"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 type memStore struct {

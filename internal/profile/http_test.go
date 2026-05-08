@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/profile"
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/profile"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 func newRegistry(t *testing.T) *profile.Registry {

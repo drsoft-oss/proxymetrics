@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/broadcaster"
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/broadcaster"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 // SSEHandler returns an http.HandlerFunc that streams broadcaster events to the

@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/audit"
-	"github.com/anonymous-proxies/proxymetrics/internal/geo"
+	"github.com/drsoft-oss/proxymetrics/internal/audit"
+	"github.com/drsoft-oss/proxymetrics/internal/geo"
 )
 
 type scriptedLookup struct {

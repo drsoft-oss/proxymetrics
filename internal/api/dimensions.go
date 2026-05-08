@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 // dimensionsCacheTTL caps the per-window result cache. Value lists rarely change

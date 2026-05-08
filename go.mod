@@ -1,4 +1,4 @@
-module github.com/anonymous-proxies/proxymetrics
+module github.com/drsoft-oss/proxymetrics
 
 go 1.25.0
 

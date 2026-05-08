@@ -8,8 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/config"
-	"github.com/anonymous-proxies/proxymetrics/internal/proxy/ca"
+	"github.com/drsoft-oss/proxymetrics/internal/config"
+	"github.com/drsoft-oss/proxymetrics/internal/proxy/ca"
 )
 
 func cacertCmd() *cobra.Command {

@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/proxy/core"
+	"github.com/drsoft-oss/proxymetrics/internal/proxy/core"
 )
 
 func TestParseProxyAuth_Valid(t *testing.T) {

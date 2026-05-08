@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 // DefaultID is the auto-created fallback profile.

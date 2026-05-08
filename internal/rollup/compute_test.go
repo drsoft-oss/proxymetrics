@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/rollup"
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
-	"github.com/anonymous-proxies/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/rollup"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
 )
 
 func openTempStore(t *testing.T) *duckdb.Store {

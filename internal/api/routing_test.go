@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/api"
+	"github.com/drsoft-oss/proxymetrics/internal/api"
 )
 
 func TestPickSource(t *testing.T) {

@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 // Sum is the boot-time aggregate dependency.

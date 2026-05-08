@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 // testEndpointHandler is set by RegisterTestEndpoint and dispatched from the

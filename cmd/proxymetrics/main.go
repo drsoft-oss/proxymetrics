@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/cli"
+	"github.com/drsoft-oss/proxymetrics/internal/cli"
 )
 
 func main() {

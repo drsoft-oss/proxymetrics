@@ -11,7 +11,7 @@ import (
 
 	"github.com/oklog/ulid/v2"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/geo"
+	"github.com/drsoft-oss/proxymetrics/internal/geo"
 )
 
 // CentroidResolver is the subset of *geo.CentroidResolver Manager needs;

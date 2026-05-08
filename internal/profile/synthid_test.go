@@ -3,7 +3,7 @@ package profile_test
 import (
 	"testing"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/profile"
+	"github.com/drsoft-oss/proxymetrics/internal/profile"
 )
 
 func TestSyntheticID(t *testing.T) {

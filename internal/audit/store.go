@@ -6,7 +6,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/geo"
+	"github.com/drsoft-oss/proxymetrics/internal/geo"
 )
 
 // Store wraps a *sql.DB (DuckDB handle) and exposes the audit module's

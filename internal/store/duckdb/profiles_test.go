@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 func TestListProfilesWithUsage_AggregatesAndRespectsWindow(t *testing.T) {

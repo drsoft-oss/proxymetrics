@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/geo"
-	"github.com/anonymous-proxies/proxymetrics/internal/ipcheck"
+	"github.com/drsoft-oss/proxymetrics/internal/geo"
+	"github.com/drsoft-oss/proxymetrics/internal/ipcheck"
 )
 
 // fakeIPCheck always returns a fixed IP without making any network calls.

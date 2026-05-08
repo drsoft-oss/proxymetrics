@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 // ParseEventFilter turns a query string into store.EventFilter.

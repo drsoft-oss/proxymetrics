@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/rollup"
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/rollup"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 type silentLogger struct{}

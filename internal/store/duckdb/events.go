@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 const eventColumns = `ts, request_id, profile_id, vendor, type, region,

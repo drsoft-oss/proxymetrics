@@ -9,9 +9,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/ipcheck"
-	"github.com/anonymous-proxies/proxymetrics/internal/profile"
-	"github.com/anonymous-proxies/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/ipcheck"
+	"github.com/drsoft-oss/proxymetrics/internal/profile"
+	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
 )
 
 func profileCmd() *cobra.Command {

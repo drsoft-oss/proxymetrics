@@ -9,7 +9,7 @@ import (
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/geo"
+	"github.com/drsoft-oss/proxymetrics/internal/geo"
 )
 
 // Expected captures what the user said the proxy should be.

@@ -10,7 +10,7 @@ import (
 
 	maxminddb "github.com/oschwald/maxminddb-golang/v2"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/ipcheck"
+	"github.com/drsoft-oss/proxymetrics/internal/ipcheck"
 )
 
 // IPDiscoverer abstracts the existing internal/ipcheck.Client.Check method so

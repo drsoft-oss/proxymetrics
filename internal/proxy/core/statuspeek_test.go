@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/proxy/core"
+	"github.com/drsoft-oss/proxymetrics/internal/proxy/core"
 )
 
 func TestStatusPeek_BasicHTTP(t *testing.T) {

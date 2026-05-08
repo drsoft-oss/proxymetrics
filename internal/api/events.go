@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 func eventsHandler(s store.Store) http.HandlerFunc {

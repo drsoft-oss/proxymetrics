@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/ipcheck"
+	"github.com/drsoft-oss/proxymetrics/internal/ipcheck"
 )
 
 func newServer(t *testing.T, body, ct string) *httptest.Server {

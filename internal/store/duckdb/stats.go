@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 func (s *Store) DBStats(ctx context.Context) (store.DBStats, error) {

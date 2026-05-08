@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/pricing"
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/pricing"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 const oneGB = 1 << 30

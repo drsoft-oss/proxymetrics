@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 // DBExec is the slice of *sql.DB the rollup package needs. Implemented by

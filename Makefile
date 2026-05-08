@@ -10,9 +10,9 @@ UI_SRC := ui
 UI_DIST_SRC := ui/dist
 UI_DIST_DST := internal/ui/ui-dist
 
-LDFLAGS := -X github.com/anonymous-proxies/proxymetrics/internal/cli.Version=$(shell git describe --tags --always --dirty 2>/dev/null || echo dev) \
-           -X github.com/anonymous-proxies/proxymetrics/internal/cli.GitCommit=$(shell git rev-parse --short HEAD 2>/dev/null || echo none) \
-           -X github.com/anonymous-proxies/proxymetrics/internal/cli.BuildDate=$(shell date -u +%Y-%m-%dT%H:%M:%SZ)
+LDFLAGS := -X github.com/drsoft-oss/proxymetrics/internal/cli.Version=$(shell git describe --tags --always --dirty 2>/dev/null || echo dev) \
+           -X github.com/drsoft-oss/proxymetrics/internal/cli.GitCommit=$(shell git rev-parse --short HEAD 2>/dev/null || echo none) \
+           -X github.com/drsoft-oss/proxymetrics/internal/cli.BuildDate=$(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \

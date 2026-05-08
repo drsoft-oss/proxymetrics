@@ -19,9 +19,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/cli"
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
-	"github.com/anonymous-proxies/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/cli"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
 )
 
 // Server is the running proxymetrics instance under test.

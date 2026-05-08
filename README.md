@@ -73,7 +73,7 @@ non-2xx responses, by provider, this billing cycle.**
 You need: Go 1.25+, Node 20+, pnpm, and a real upstream proxy URL from any vendor.
 
 ```bash
-git clone https://github.com/anonymous-proxies/proxymetrics
+git clone https://github.com/drsoft-oss/proxymetrics
 cd proxymetrics
 
 make build
@@ -153,8 +153,8 @@ To tail events from the CLI instead:
                     ┌─────────────────────────────────────────────┐
                     │              ProxyMetrics binary            │
    ┌─────────┐      │  ┌──────────┐   ┌──────────┐   ┌─────────┐  │      ┌─────────────┐
-   │ scraper │ ─────┼─▶│  proxy   │──▶│ writer + │──▶│ DuckDB  │  │      │   Bright    │
-   │ (curl,  │      │  │  :8080   │   │ rollups  │   │  file   │  │      │   Data /    │
+   │ scraper │ ─────┼─▶│  proxy   │──▶│ writer + │──▶│ DuckDB  │  │      │ Anonymous   │
+   │ (curl,  │      │  │  :8080   │   │ rollups  │   │  file   │  │      │  Proxies /  │
    │ Scrapy, │      │  │ (MITM)   │──┼┐          │   └─────────┘  │      │  Oxylabs /  │
    │ etc.)   │      │  └──────────┘  ││          │        ▲       │      │  upstream   │
    └─────────┘      │                ││          │        │       │      └──────┬──────┘

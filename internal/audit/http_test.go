@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/audit"
+	"github.com/drsoft-oss/proxymetrics/internal/audit"
 )
 
 func newServerWithMgr(t *testing.T) (string, *audit.Manager, func()) {

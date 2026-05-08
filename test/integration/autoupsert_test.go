@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store/duckdb"
-	"github.com/anonymous-proxies/proxymetrics/test/integration"
+	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/test/integration"
 )
 
 // TestAutoUpsertProfile_FromObservedTraffic asserts that when N requests with

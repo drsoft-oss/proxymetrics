@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 func (s *Store) QueryEvents(ctx context.Context, f store.EventFilter) ([]store.Event, int64, error) {

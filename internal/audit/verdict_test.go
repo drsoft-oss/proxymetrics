@@ -3,8 +3,8 @@ package audit_test
 import (
 	"testing"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/audit"
-	"github.com/anonymous-proxies/proxymetrics/internal/geo"
+	"github.com/drsoft-oss/proxymetrics/internal/audit"
+	"github.com/drsoft-oss/proxymetrics/internal/geo"
 )
 
 func TestEvaluate_LocationCountryMatch(t *testing.T) {

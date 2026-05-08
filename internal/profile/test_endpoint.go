@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/ipcheck"
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/ipcheck"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 // ProxyClientBuilder produces an *http.Client whose outbound requests are routed

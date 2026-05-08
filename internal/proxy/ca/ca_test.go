@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/proxy/ca"
+	"github.com/drsoft-oss/proxymetrics/internal/proxy/ca"
 )
 
 func TestGenerateAndLoad(t *testing.T) {

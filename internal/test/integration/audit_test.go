@@ -13,9 +13,9 @@ import (
 
 	"github.com/elazarl/goproxy"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/audit"
-	"github.com/anonymous-proxies/proxymetrics/internal/geo"
-	"github.com/anonymous-proxies/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/audit"
+	"github.com/drsoft-oss/proxymetrics/internal/geo"
+	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
 )
 
 func TestIntegration_GeoAudit_EndToEnd(t *testing.T) {

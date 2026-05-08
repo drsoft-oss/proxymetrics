@@ -9,8 +9,8 @@ import (
 
 	_ "github.com/marcboeker/go-duckdb/v2"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/audit"
-	"github.com/anonymous-proxies/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/audit"
+	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
 )
 
 func openTestStore(t *testing.T) (*audit.Store, *sql.DB, func()) {

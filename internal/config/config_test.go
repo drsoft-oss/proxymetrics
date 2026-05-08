@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/config"
+	"github.com/drsoft-oss/proxymetrics/internal/config"
 )
 
 func writeTemp(t *testing.T, body string) string {

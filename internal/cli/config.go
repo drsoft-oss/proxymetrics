@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/config"
+	"github.com/drsoft-oss/proxymetrics/internal/config"
 )
 
 func configCmd() *cobra.Command {

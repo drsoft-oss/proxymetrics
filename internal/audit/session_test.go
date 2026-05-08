@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/audit"
+	"github.com/drsoft-oss/proxymetrics/internal/audit"
 )
 
 func TestRotateSession_HappyPath(t *testing.T) {

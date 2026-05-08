@@ -3,7 +3,7 @@ package credtags_test
 import (
 	"testing"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/proxy/credtags"
+	"github.com/drsoft-oss/proxymetrics/internal/proxy/credtags"
 )
 
 func TestParse(t *testing.T) {

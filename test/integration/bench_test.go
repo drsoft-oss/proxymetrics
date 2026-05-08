@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/test/integration"
+	"github.com/drsoft-oss/proxymetrics/test/integration"
 )
 
 func BenchmarkMITMOverhead(b *testing.B) {

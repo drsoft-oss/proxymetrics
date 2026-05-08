@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/broadcaster"
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/broadcaster"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 // Register installs every #2 endpoint on the given mux.

@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/audit"
+	"github.com/drsoft-oss/proxymetrics/internal/audit"
 )
 
 func TestParseCredtag_AllFields(t *testing.T) {

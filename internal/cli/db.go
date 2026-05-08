@@ -15,7 +15,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
 )
 
 func dbCmd() *cobra.Command {

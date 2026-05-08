@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/events"
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/events"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 type captureStore struct {

@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 func overviewHandler(s store.Store) http.HandlerFunc {

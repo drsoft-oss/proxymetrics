@@ -18,10 +18,10 @@ import (
 	"github.com/elazarl/goproxy"
 	"github.com/oklog/ulid/v2"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/profile"
-	"github.com/anonymous-proxies/proxymetrics/internal/proxy/ca"
-	"github.com/anonymous-proxies/proxymetrics/internal/proxy/credtags"
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/profile"
+	"github.com/drsoft-oss/proxymetrics/internal/proxy/ca"
+	"github.com/drsoft-oss/proxymetrics/internal/proxy/credtags"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 // EventEmitter receives finalized events from the hot path.

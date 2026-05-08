@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/broadcaster"
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/broadcaster"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 func TestPublish_NoSubscribers_NoOp(t *testing.T) {

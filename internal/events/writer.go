@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 // Sink is the slice of store.Store actually used by the writer.

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/api"
+	"github.com/drsoft-oss/proxymetrics/internal/api"
 )
 
 func TestParseEventFilter_Defaults(t *testing.T) {

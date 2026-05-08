@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/api"
-	"github.com/anonymous-proxies/proxymetrics/internal/broadcaster"
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/api"
+	"github.com/drsoft-oss/proxymetrics/internal/broadcaster"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 func TestSSE_DeliversPublishedEvents(t *testing.T) {

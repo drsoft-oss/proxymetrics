@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/audit"
+	"github.com/drsoft-oss/proxymetrics/internal/audit"
 )
 
 func TestSSE_StreamsThenFinishes(t *testing.T) {

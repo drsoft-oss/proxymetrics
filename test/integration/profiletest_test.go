@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
-	"github.com/anonymous-proxies/proxymetrics/test/integration"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/test/integration"
 )
 
 func TestProfileTestEndpoint_RoutesAndReturnsExitIP(t *testing.T) {

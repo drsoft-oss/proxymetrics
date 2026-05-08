@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/geo"
+	"github.com/drsoft-oss/proxymetrics/internal/geo"
 )
 
 func TestIPAPIIs_Lookup_Success(t *testing.T) {

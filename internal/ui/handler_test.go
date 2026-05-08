@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/ui"
+	"github.com/drsoft-oss/proxymetrics/internal/ui"
 )
 
 func TestHandler_ServesIndexAtRoot(t *testing.T) {

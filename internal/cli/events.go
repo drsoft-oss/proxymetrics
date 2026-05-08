@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 func eventsCmd() *cobra.Command {

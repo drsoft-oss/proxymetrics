@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/geo"
+	"github.com/drsoft-oss/proxymetrics/internal/geo"
 )
 
 type fakeLookup struct {

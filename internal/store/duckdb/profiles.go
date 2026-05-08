@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
 const profileColumns = `id, label, vendor, type, region, upstream_url,

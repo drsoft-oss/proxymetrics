@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/store"
-	"github.com/anonymous-proxies/proxymetrics/internal/store/duckdb"
-	"github.com/anonymous-proxies/proxymetrics/test/integration"
+	"github.com/drsoft-oss/proxymetrics/internal/store"
+	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/test/integration"
 )
 
 // TestBurst_AllEventsPersisted submits a burst of requests and confirms all of

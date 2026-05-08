@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/test/integration"
+	"github.com/drsoft-oss/proxymetrics/test/integration"
 )
 
 func TestHappyPath_HTTPRequest_RecordsEvent(t *testing.T) {

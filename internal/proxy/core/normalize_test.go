@@ -3,7 +3,7 @@ package core_test
 import (
 	"testing"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/proxy/core"
+	"github.com/drsoft-oss/proxymetrics/internal/proxy/core"
 )
 
 func TestNormalizeHost(t *testing.T) {

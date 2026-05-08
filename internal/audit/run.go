@@ -11,7 +11,7 @@ import (
 
 	"golang.org/x/sync/semaphore"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/geo"
+	"github.com/drsoft-oss/proxymetrics/internal/geo"
 )
 
 // persistTimeout bounds DuckDB writes from inside *Run so a wedged DB

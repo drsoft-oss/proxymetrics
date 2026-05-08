@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/proxy/core"
+	"github.com/drsoft-oss/proxymetrics/internal/proxy/core"
 )
 
 func TestCountingReader_HappyPath(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/anonymous-proxies/proxymetrics/internal/proxy/ca"
+	"github.com/drsoft-oss/proxymetrics/internal/proxy/ca"
 )
 
 func mux(t *testing.T) (*ca.CA, http.Handler) {

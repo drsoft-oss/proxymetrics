@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anonymous-proxies/proxymetrics/test/integration"
+	"github.com/drsoft-oss/proxymetrics/test/integration"
 )
 
 // TestMissingProvider_FailsButRecords verifies that a request whose proxy-auth
