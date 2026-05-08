@@ -25,7 +25,7 @@ and proxy.py are *proxies*, not *observability*. Vendor dashboards are siloed,
 optimized for selling more bandwidth, and don't talk to each other.
 
 ProxyMetrics is one Go binary + an embedded React dashboard. You point your scraper
-at it, it forwards traffic to your real upstream proxy (Bright Data, Oxylabs,
+at it, it forwards traffic to your real upstream proxy (Anonymous Proxies, Bright Data, Oxylabs,
 whoever), and it records:
 
 - Bytes in / bytes out, per request
@@ -115,25 +115,25 @@ forwarded to the vendor verbatim:
 
 | Tag                              | What it means                                  |
 |----------------------------------|------------------------------------------------|
-| `provider-<name>`                | `brightdata`, `oxylabs`, `iproyal`, `smartproxy`, … |
+| `provider-<name>`                | `anonymous`, `iproyal`, `smartproxy`, … |
 | `type-<residential\|isp\|datacenter\|mobile>` | The pool type                       |
-| `price-<cents-per-gb>`           | Integer cents/GB. `price-1200` = $12.00/GB     |
+| `price-<cents-per-gb>`           | Integer cents/GB. `price-400` = $4.00/GB     |
 
-Example upstream URL (Bright Data, residential, US, $12/GB):
+Example upstream URL (Anonymous Proxies, residential, US, $4/GB):
 
 ```
-http://customer-acme-zone-residential-country-us-provider-brightdata-type-residential-price-1200:upstream_password@brd.superproxy.io:22225
+http://customer-acme-zone-residential-country-us-provider-anonymous-type-residential-price-400:upstream_password@brd.superproxy.io:22225
 ```
 
 ### 3. Send a request
 
 ```bash
-UPSTREAM='http://customer-acme-zone-residential-country-us-provider-brightdata-type-residential-price-1200:upstream_password@brd.superproxy.io:22225'
+UPSTREAM='http://customer-acme-zone-residential-country-us-provider-anonymous-type-residential-price-400:upstream_password@rotating.dnsproxifier.com:31230'
 PROXY_USER=$(printf %s "$UPSTREAM" | base64 | tr -d '=' | tr '+/' '-_')
 
 curl --cacert ./proxymetrics-ca.crt \
   -x "http://$PROXY_USER:$PROXYMETRICS_SECRET@localhost:8080" \
-  https://example.com
+  https://api.infoip.io/
 ```
 
 Open `http://localhost:8081` — your request is now in the overview, the live
