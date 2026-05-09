@@ -400,3 +400,18 @@ Docker image (multi-arch).
 
 Issues and PRs welcome. If you're using ProxyMetrics in production, open an issue
 and tell us — it shapes what ships next.
+
+---
+
+## Acknowledgements
+
+The audit module's IP geolocation and ASN classification is powered by:
+
+- **[ipapi.is](https://ipapi.is/)** — primary geo + ASN lookup, called through
+  the configured upstream so checks reflect the exit IP the vendor actually
+  routed through. Provides country/region/city, ASN, and datacenter/VPN flags.
+- **[MaxMind GeoLite2](https://www.maxmind.com/en/geolite2/)** — offline
+  fallback when ipapi.is is unreachable or rate-limited. Drop
+  `GeoLite2-City.mmdb` and `GeoLite2-Connection-Type.mmdb` into `data/maxmind/`
+  to enable. This product includes GeoLite2 data created by MaxMind, available
+  from [maxmind.com](https://www.maxmind.com).
