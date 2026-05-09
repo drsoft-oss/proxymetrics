@@ -18,7 +18,7 @@ export function AuditResultsSheet({ rows, total, expectedCity, sessionKey, uniqu
   const errors = rows.filter((r) => r.error);
 
   const accuracyPct = completed === 0 ? 0 : Math.round((locMatches / completed) * 100);
-  const lyingPct = completed === 0 ? 0 : Math.round((typeMismatches / completed) * 100);
+  const mismatchPct = completed === 0 ? 0 : Math.round((typeMismatches / completed) * 100);
 
   const matchMix = useMemo(() => {
     const ok = rows.filter((r) => !r.error && r.location_match && r.type_match).length;
@@ -81,7 +81,7 @@ export function AuditResultsSheet({ rows, total, expectedCity, sessionKey, uniqu
       <div className="grid grid-cols-3 gap-2">
         <Stat label="completed" value={`${completed} / ${total}`} />
         <Stat label="accuracy" value={`${accuracyPct}%`} className={colour(accuracyPct)} />
-        <Stat label="lying" value={`${lyingPct}%`} className={colour(100 - lyingPct)} />
+        <Stat label="mismatch" value={`${mismatchPct}%`} className={colour(100 - mismatchPct)} />
       </div>
 
       <div data-testid="pool-richness" className={"rounded border p-2 " + richnessClass}>
