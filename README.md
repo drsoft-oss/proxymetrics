@@ -5,10 +5,10 @@ that records every request — status, latency, bytes, target, exit IP geo, and 
 across every vendor you use, then rolls it up so you can compare providers, audit pool 
 quality, debug failures, and attribute spend
 
-If you're running scrapers across Anonymous Proxies, Bright Data, Oxylabs, IPRoyal, Smartproxy or any
-mix of residential / ISP / datacenter pools, this is for you. You already know the
-problem: each vendor has its own dashboard, none of them agree on success rates,
-and at the end of the month you can't answer:
+If you're running scrapers across any mix of residential / ISP / datacenter
+pools, this is for you. You already know the problem: every proxy vendor has
+its own siloed dashboard, the numbers don't agree, and at the end of the month
+you still can't answer:
 
 - *Which vendor is the most expensive per successful request on `amazon.com`?*
 - *How many GB did I burn on 403s and 429s last week?*
@@ -21,13 +21,14 @@ puts the answers in a dashboard you can self-host on a $5 VPS.
 
 ## Why it exists
 
-Scrapoxy was the closest thing to this — and it's discontinued. Mitmproxy, gost,
-and proxy.py are *proxies*, not *observability*. Vendor dashboards are siloed,
-optimized for selling more bandwidth, and don't talk to each other.
+You can't optimize what you can't measure, and proxy spend is one of the
+biggest line items in any scraping operation. Vendor dashboards won't tell you
+which provider is wasting your budget on 403s, which "residential" pool is
+actually datacenter, or which target host costs the most per successful
+request. ProxyMetrics does.
 
-ProxyMetrics is one Go binary + an embedded React dashboard. You point your scraper
-at it, it forwards traffic to your real upstream proxy (Anonymous Proxies, Bright Data, Oxylabs,
-whoever), and it records:
+It's one Go binary + an embedded React dashboard. You point your scraper at
+it, it forwards traffic to your upstream proxy, and it records:
 
 - Bytes in / bytes out, per request
 - HTTP status code (200 / 301 / 403 / 429 / 5xx / timeout)
@@ -71,8 +72,7 @@ non-2xx responses, by provider, this billing cycle.**
 
 ## Quickstart (5 minutes)
 
-You need a real upstream proxy URL from any vendor (Anonymous Proxies, Bright
-Data, Oxylabs, IPRoyal, Smartproxy, …).
+You need a real upstream proxy URL from your vendor.
 
 ### Install
 
@@ -161,7 +161,7 @@ forwarded to the vendor verbatim:
 | `type-<residential\|isp\|datacenter\|mobile>` | The pool type                       |
 | `price-<cents-per-gb>`           | Integer cents/GB. `price-400` = $4.00/GB     |
 
-Example upstream URL (Anonymous Proxies, residential, US, $4/GB):
+Example upstream URL (residential, US, $4/GB):
 
 ```
 http://customer-acme-zone-residential-country-us-provider-anonymous-type-residential-price-400:upstream_password@rotating.dnsproxifier.com:31230
@@ -195,10 +195,10 @@ proxymetrics events tail -c config.yaml
                     ┌─────────────────────────────────────────────┐
                     │              ProxyMetrics binary            │
    ┌─────────┐      │  ┌──────────┐   ┌──────────┐   ┌─────────┐  │      ┌─────────────┐
-   │ scraper │ ─────┼─▶│  proxy   │──▶│ writer + │──▶│ SQLite  │  │      │ Anonymous   │
-   │ (curl,  │      │  │  :8080   │   │ rollups  │   │  file   │  │      │  Proxies /  │
-   │ Scrapy, │      │  │ (MITM)   │──┼┐          │   └─────────┘  │      │  Oxylabs /  │
-   │ etc.)   │      │  └──────────┘  ││          │        ▲       │      │  upstream   │
+   │ scraper │ ─────┼─▶│  proxy   │──▶│ writer + │──▶│ SQLite  │  │      │             │
+   │ (curl,  │      │  │  :8080   │   │ rollups  │   │  file   │  │      │  upstream   │
+   │ Scrapy, │      │  │ (MITM)   │──┼┐          │   └─────────┘  │      │   proxy     │
+   │ etc.)   │      │  └──────────┘  ││          │        ▲       │      │             │
    └─────────┘      │                ││          │        │       │      └──────┬──────┘
                     │  ┌──────────┐  ││  ┌───────┴──────┐ │       │             │
         dashboard ──┼─▶│ admin    │──┼┴─▶│  embedded    │─┘       │             │
@@ -207,7 +207,7 @@ proxymetrics events tail -c config.yaml
                     │  └──────────┘  │                            │             │
                     │                └────────────────────────────┼─────────────┘
                     └─────────────────────────────────────────────┘
-                                                                       (vendor traffic)
+                                                                        (forwarded)
 ```
 
 1. The scraper sends a request to the MITM proxy on `:8080`.
