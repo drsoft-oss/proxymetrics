@@ -23,6 +23,7 @@ DOCKER_IMAGE     ?= drsoft/proxymetrics
 DOCKER_PLATFORMS ?= linux/amd64,linux/arm64
 DOCKER_REF       := $(DOCKER_REGISTRY)/$(DOCKER_IMAGE)
 DOCKER_BUILDER   ?= proxymetrics-builder
+DOCKER_VERSION   ?= latest
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
@@ -75,21 +76,14 @@ clean: ## Remove build artifacts (./data is left alone)
 	rm -rf $(UI_SRC)/.vite
 	@find $(UI_DIST_DST) -mindepth 1 ! -name 'index.html' -delete
 
-docker-build: ## Build a single-arch image locally as $(DOCKER_IMAGE):$(VERSION) (and :dev)
+docker-build: ## Build a single-arch image locally as $(DOCKER_IMAGE):$(DOCKER_VERSION) (and :dev). Override DOCKER_VERSION=vX.Y.Z to pin a release; default "latest" is resolved at build time.
 	docker build \
-	  --build-arg VERSION=$(VERSION) \
-	  --build-arg GIT_COMMIT=$(GIT_COMMIT) \
-	  --build-arg BUILD_DATE=$(BUILD_DATE) \
-	  -t $(DOCKER_IMAGE):$(VERSION) \
+	  --build-arg VERSION=$(DOCKER_VERSION) \
+	  -t $(DOCKER_IMAGE):$(DOCKER_VERSION) \
 	  -t $(DOCKER_IMAGE):dev \
 	  .
 
-docker-push: ## Build multi-arch and push to Docker Hub. Requires `docker login` + a clean semver tag. Override with VERSION=vX.Y.Z.
-	@if ! echo "$(VERSION)" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$$'; then \
-	  echo "error: VERSION=$(VERSION) is not a clean semver tag (expected vX.Y.Z[-prerelease])." >&2; \
-	  echo "       Tag a release first ('make release') or override with VERSION=v1.2.3." >&2; \
-	  exit 1; \
-	fi
+docker-push: ## Build multi-arch and push $(DOCKER_REF):latest to Docker Hub. Requires `docker login`.
 	@if ! docker buildx inspect $(DOCKER_BUILDER) >/dev/null 2>&1; then \
 	  echo "creating buildx builder '$(DOCKER_BUILDER)'..."; \
 	  docker buildx create --name $(DOCKER_BUILDER) --use >/dev/null; \
@@ -97,20 +91,13 @@ docker-push: ## Build multi-arch and push to Docker Hub. Requires `docker login`
 	else \
 	  docker buildx use $(DOCKER_BUILDER) >/dev/null; \
 	fi
-	@case "$(VERSION)" in \
-	  *-*) extra_tag=""; latest_note="(prerelease — :latest not updated)" ;; \
-	  *)   extra_tag="-t $(DOCKER_REF):latest"; latest_note="and :latest" ;; \
-	esac; \
 	docker buildx build \
 	  --platform $(DOCKER_PLATFORMS) \
-	  --build-arg VERSION=$(VERSION) \
-	  --build-arg GIT_COMMIT=$(GIT_COMMIT) \
-	  --build-arg BUILD_DATE=$(BUILD_DATE) \
-	  -t $(DOCKER_REF):$(VERSION) \
-	  $$extra_tag \
+	  --build-arg VERSION=latest \
+	  -t $(DOCKER_REF):latest \
 	  --push \
-	  . && \
-	echo "pushed $(DOCKER_REF):$(VERSION) $$latest_note"
+	  .
+	@echo "pushed $(DOCKER_REF):latest"
 
 release: ## Tag the next semver from commits and push to GitHub (triggers release CI). Use VERSION=vX.Y.Z to override.
 	@if [ -n "$$(git status --porcelain)" ]; then \

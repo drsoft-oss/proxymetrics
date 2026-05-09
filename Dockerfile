@@ -1,41 +1,34 @@
 # syntax=docker/dockerfile:1.7
 
-# ─── UI builder ───────────────────────────────────────────────────────────────
-FROM node:20-alpine AS ui
+# ─── Downloader ───────────────────────────────────────────────────────────────
+# Pulls a published release tarball from GitHub Releases. Override VERSION to
+# pin a specific tag (e.g. v0.1.2); the default resolves "latest" at build time.
+FROM alpine:3.19 AS download
 
-WORKDIR /src/ui
-RUN corepack enable
+ARG VERSION=latest
+ARG TARGETOS
+ARG TARGETARCH
 
-COPY ui/package.json ui/pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN apk add --no-cache ca-certificates curl tar
 
-COPY ui/ ./
-RUN pnpm run build
-
-# ─── Go builder ───────────────────────────────────────────────────────────────
-FROM golang:1.25-alpine AS build
-
-ARG VERSION=dev
-ARG GIT_COMMIT=none
-ARG BUILD_DATE=
-
-WORKDIR /src
-
-COPY go.mod go.sum ./
-RUN go mod download
-
-COPY . .
-COPY --from=ui /src/ui/dist/ ./internal/ui/ui-dist/
-
-ENV CGO_ENABLED=0 GOOS=linux
-RUN go build \
-      -trimpath \
-      -ldflags "-s -w \
-        -X github.com/drsoft-oss/proxymetrics/internal/cli.Version=${VERSION} \
-        -X github.com/drsoft-oss/proxymetrics/internal/cli.GitCommit=${GIT_COMMIT} \
-        -X github.com/drsoft-oss/proxymetrics/internal/cli.BuildDate=${BUILD_DATE}" \
-      -o /out/proxymetrics \
-      ./cmd/proxymetrics
+WORKDIR /work
+RUN set -eux; \
+    if [ "${VERSION}" = "latest" ]; then \
+      tag=$(curl -fsSL https://api.github.com/repos/drsoft-oss/proxymetrics/releases/latest \
+              | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p'); \
+    else \
+      tag="${VERSION}"; \
+    fi; \
+    test -n "${tag}"; \
+    semver="${tag#v}"; \
+    base="https://github.com/drsoft-oss/proxymetrics/releases/download/${tag}"; \
+    archive="proxymetrics_${semver}_${TARGETOS}_${TARGETARCH}.tar.gz"; \
+    checksums="proxymetrics_${semver}_checksums.txt"; \
+    curl -fsSL -o "${archive}"   "${base}/${archive}"; \
+    curl -fsSL -o "${checksums}" "${base}/${checksums}"; \
+    grep "  ${archive}$" "${checksums}" | sha256sum -c -; \
+    tar -xzf "${archive}" proxymetrics; \
+    chmod +x ./proxymetrics
 
 # ─── Runtime ──────────────────────────────────────────────────────────────────
 FROM alpine:3.19
@@ -46,7 +39,7 @@ RUN apk add --no-cache ca-certificates tzdata \
  && mkdir -p /data \
  && chown -R proxymetrics:proxymetrics /data
 
-COPY --from=build /out/proxymetrics /usr/local/bin/proxymetrics
+COPY --from=download /work/proxymetrics /usr/local/bin/proxymetrics
 
 USER 65532:65532
 WORKDIR /data

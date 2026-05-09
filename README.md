@@ -1,8 +1,9 @@
 # ProxyMetrics
 
-**Stop guessing where your proxy budget went.** A self-hosted MITM proxy router that
-sits between your scrapers and your proxy vendors and tells you, per request, what
-you spent — and which vendor, region, target, and HTTP status it was spent on.
+Know what's actually happening on your proxy stack. Self-hosted MITM router + dashboard
+that records every request — status, latency, bytes, target, exit IP geo, and cost — 
+across every vendor you use, then rolls it up so you can compare providers, audit pool 
+quality, debug failures, and attribute spend
 
 If you're running scrapers across Anonymous Proxies, Bright Data, Oxylabs, IPRoyal, Smartproxy or any
 mix of residential / ISP / datacenter pools, this is for you. You already know the
@@ -82,6 +83,32 @@ brew install drsoft-oss/tap/proxymetrics
 Or grab a prebuilt binary for your OS/arch from the [latest GitHub
 release](https://github.com/drsoft-oss/proxymetrics/releases/latest) and put it
 on your `$PATH`.
+
+### Or run with Docker
+
+If you'd rather skip installing the binary, run the prebuilt image from Docker
+Hub: [`drsoft/proxymetrics`](https://hub.docker.com/r/drsoft/proxymetrics).
+Multi-arch (`linux/amd64`, `linux/arm64`). Tags: `latest` plus `vX.Y.Z` per
+release.
+
+```bash
+mkdir -p ./data
+curl -fsSL https://raw.githubusercontent.com/drsoft-oss/proxymetrics/main/config.example.yaml \
+  -o ./data/config.yaml
+export PROXYMETRICS_SECRET=$(openssl rand -hex 16)
+
+docker run -d \
+  --name proxymetrics \
+  -p 8080:8080 -p 8081:8081 \
+  -v "$(pwd)/data:/data" \
+  -e PROXYMETRICS_SECRET \
+  drsoft/proxymetrics:latest
+```
+
+The `/data` volume holds the SQLite database, the generated MITM CA, and your
+`config.yaml`. The container runs as a non-root UID (`65532`); make sure the
+host directory is writable by it. If you went the Docker route, skip **Run the
+server** below and continue at **Trust the CA**.
 
 ### Run the server
 
@@ -357,7 +384,9 @@ MIT — see [`LICENSE`](LICENSE).
 
 Active development. The core proxy + storage, REST aggregations, dashboard
 shell, data viewer pages, profiles, credtags, and audit module are all shipped.
-Packaging (Docker image, prebuilt binaries, Homebrew tap) is the next milestone.
+Packaging is in place: Homebrew tap, prebuilt binaries on GitHub Releases, and
+the [`drsoft/proxymetrics`](https://hub.docker.com/r/drsoft/proxymetrics)
+Docker image (multi-arch).
 
 Issues and PRs welcome. If you're using ProxyMetrics in production, open an issue
 and tell us — it shapes what ships next.
