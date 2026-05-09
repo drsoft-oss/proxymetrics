@@ -122,8 +122,8 @@ release: ## Tag the next semver from commits and push to GitHub (triggers releas
 	read -r reply </dev/tty || { echo "error: no interactive terminal — aborting." >&2; exit 1; }; \
 	case "$$reply" in y|Y) ;; *) echo "aborted."; exit 1;; esac; \
 	git tag -a "$$next" -m "Release $$next"; \
-	git push origin main; \
-	git push origin "$$next"; \
+	git push origin main || { echo "error: push of main failed. Local tag $$next is created. Recover with: git push origin main && git push origin $$next" >&2; exit 1; }; \
+	git push origin "$$next" || { echo "error: push of tag $$next failed. Local tag exists. Recover with: git push origin $$next" >&2; exit 1; }; \
 	echo "released $$next"
 
 .PHONY: help build-ui build test test-integration test-ui bench lint fmt tidy clean dev dev-go dev-ui release
