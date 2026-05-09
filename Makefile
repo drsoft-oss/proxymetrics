@@ -80,7 +80,7 @@ release: ## Tag the next semver from commits and push to GitHub (triggers releas
 	  echo "error: local main is behind origin/main. Pull first." >&2; \
 	  exit 1; \
 	fi; \
-	current=$$(git tag --list 'v*.*.*' | sort -V | tail -n 1); \
+	current=$$(git tag --list 'v*.*.*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$$' | sort -V | tail -n 1); \
 	if [ -n "$${VERSION:-}" ]; then \
 	  next="$$VERSION"; \
 	  bump_kind="forced"; \
@@ -119,7 +119,7 @@ release: ## Tag the next semver from commits and push to GitHub (triggers releas
 	  git log --oneline "$$current"..HEAD; \
 	fi; \
 	printf "Proceed? [y/N] "; \
-	read -r reply; \
+	read -r reply </dev/tty || { echo "error: no interactive terminal — aborting." >&2; exit 1; }; \
 	case "$$reply" in y|Y) ;; *) echo "aborted."; exit 1;; esac; \
 	git tag -a "$$next" -m "Release $$next"; \
 	git push origin main; \
