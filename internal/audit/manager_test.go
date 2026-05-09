@@ -10,7 +10,7 @@ import (
 
 	"github.com/drsoft-oss/proxymetrics/internal/audit"
 	"github.com/drsoft-oss/proxymetrics/internal/geo"
-	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/store/sqlite"
 )
 
 type stubResolver struct{ lat, lon float64 }
@@ -28,7 +28,7 @@ func (s stubLookup) Lookup(_ context.Context, _ *http.Client) (geo.Result, error
 func openTestManager(t *testing.T) (*audit.Manager, *audit.Store, func()) {
 	t.Helper()
 	dir := t.TempDir()
-	s, err := duckdb.Open(filepath.Join(dir, "t.duckdb"))
+	s, err := sqlite.Open(filepath.Join(dir, "t.db"))
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}

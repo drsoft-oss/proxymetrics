@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/store/sqlite"
 	"github.com/drsoft-oss/proxymetrics/test/integration"
 )
 
@@ -37,7 +37,7 @@ func TestAutoUpsertProfile_FromObservedTraffic(t *testing.T) {
 	wantID := "novelvendor-datacenter"
 	deadline := time.Now().Add(3 * time.Second)
 	for {
-		s, err := duckdb.Open(srv.DBPath)
+		s, err := sqlite.Open(srv.DBPath)
 		if err == nil {
 			profiles, _ := s.ListProfiles(context.Background())
 			s.Close()

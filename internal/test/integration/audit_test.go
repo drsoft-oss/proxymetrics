@@ -15,7 +15,7 @@ import (
 
 	"github.com/drsoft-oss/proxymetrics/internal/audit"
 	"github.com/drsoft-oss/proxymetrics/internal/geo"
-	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/store/sqlite"
 )
 
 func TestIntegration_GeoAudit_EndToEnd(t *testing.T) {
@@ -37,9 +37,9 @@ func TestIntegration_GeoAudit_EndToEnd(t *testing.T) {
 
 	// Audit manager wired to the fake upstream and a fake centroid resolver.
 	dir := t.TempDir()
-	s, err := duckdb.Open(filepath.Join(dir, "i.duckdb"))
+	s, err := sqlite.Open(filepath.Join(dir, "i.db"))
 	if err != nil {
-		t.Fatalf("open duckdb: %v", err)
+		t.Fatalf("open sqlite: %v", err)
 	}
 	defer s.Close()
 
@@ -119,7 +119,7 @@ func TestIntegration_GeoAudit_RotatesSessionPerRequest(t *testing.T) {
 	defer proxSrv.Close()
 
 	dir := t.TempDir()
-	s, err := duckdb.Open(filepath.Join(dir, "i.duckdb"))
+	s, err := sqlite.Open(filepath.Join(dir, "i.db"))
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}

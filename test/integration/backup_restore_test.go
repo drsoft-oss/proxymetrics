@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/drsoft-oss/proxymetrics/internal/store"
-	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/store/sqlite"
 )
 
 func TestE2E_BackupRestore_RoundTrip(t *testing.T) {
@@ -54,8 +54,8 @@ logging:
 		t.Fatal(err)
 	}
 
-	dbPath := filepath.Join(dataDir, "events.duckdb")
-	s, err := duckdb.Open(dbPath)
+	dbPath := filepath.Join(dataDir, "events.db")
+	s, err := sqlite.Open(dbPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,7 +90,7 @@ logging:
 		t.Fatalf("restore: %v\n%s", err, out)
 	}
 
-	s2, err := duckdb.Open(dbPath)
+	s2, err := sqlite.Open(dbPath)
 	if err != nil {
 		t.Fatal(err)
 	}

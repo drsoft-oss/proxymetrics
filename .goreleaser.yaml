@@ -7,75 +7,16 @@ before:
     - go mod tidy
 
 builds:
-  - id: proxymetrics-linux-amd64
+  - id: proxymetrics
     main: ./cmd/proxymetrics
     binary: proxymetrics
     env:
-      - CGO_ENABLED=1
-      - CC=zig cc -target x86_64-linux-gnu
-      - CXX=zig c++ -target x86_64-linux-gnu
-    goos: [linux]
-    goarch: [amd64]
-    ldflags:
-      - -s -w
-      - -X github.com/drsoft-oss/proxymetrics/internal/cli.Version={{.Version}}
-      - -X github.com/drsoft-oss/proxymetrics/internal/cli.GitCommit={{.ShortCommit}}
-      - -X github.com/drsoft-oss/proxymetrics/internal/cli.BuildDate={{.Date}}
-
-  - id: proxymetrics-linux-arm64
-    main: ./cmd/proxymetrics
-    binary: proxymetrics
-    env:
-      - CGO_ENABLED=1
-      - CC=zig cc -target aarch64-linux-gnu
-      - CXX=zig c++ -target aarch64-linux-gnu
-    goos: [linux]
-    goarch: [arm64]
-    ldflags:
-      - -s -w
-      - -X github.com/drsoft-oss/proxymetrics/internal/cli.Version={{.Version}}
-      - -X github.com/drsoft-oss/proxymetrics/internal/cli.GitCommit={{.ShortCommit}}
-      - -X github.com/drsoft-oss/proxymetrics/internal/cli.BuildDate={{.Date}}
-
-  - id: proxymetrics-darwin-amd64
-    main: ./cmd/proxymetrics
-    binary: proxymetrics
-    env:
-      - CGO_ENABLED=1
-      - CC=zig cc -target x86_64-macos
-      - CXX=zig c++ -target x86_64-macos
-    goos: [darwin]
-    goarch: [amd64]
-    ldflags:
-      - -s -w
-      - -X github.com/drsoft-oss/proxymetrics/internal/cli.Version={{.Version}}
-      - -X github.com/drsoft-oss/proxymetrics/internal/cli.GitCommit={{.ShortCommit}}
-      - -X github.com/drsoft-oss/proxymetrics/internal/cli.BuildDate={{.Date}}
-
-  - id: proxymetrics-darwin-arm64
-    main: ./cmd/proxymetrics
-    binary: proxymetrics
-    env:
-      - CGO_ENABLED=1
-      - CC=zig cc -target aarch64-macos
-      - CXX=zig c++ -target aarch64-macos
-    goos: [darwin]
-    goarch: [arm64]
-    ldflags:
-      - -s -w
-      - -X github.com/drsoft-oss/proxymetrics/internal/cli.Version={{.Version}}
-      - -X github.com/drsoft-oss/proxymetrics/internal/cli.GitCommit={{.ShortCommit}}
-      - -X github.com/drsoft-oss/proxymetrics/internal/cli.BuildDate={{.Date}}
-
-  - id: proxymetrics-windows-amd64
-    main: ./cmd/proxymetrics
-    binary: proxymetrics
-    env:
-      - CGO_ENABLED=1
-      - CC=zig cc -target x86_64-windows-gnu
-      - CXX=zig c++ -target x86_64-windows-gnu
-    goos: [windows]
-    goarch: [amd64]
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    ignore:
+      - goos: windows
+        goarch: arm64
     ldflags:
       - -s -w
       - -X github.com/drsoft-oss/proxymetrics/internal/cli.Version={{.Version}}
@@ -119,11 +60,13 @@ changelog:
       - "^chore:"
       - "^ci:"
 
-brews:
+homebrew_casks:
   - name: proxymetrics
     description: "Self-hosted MITM proxy router that tracks per-request proxy spend across vendors"
     homepage: "https://github.com/drsoft-oss/proxymetrics"
-    license: "MIT"
+    binary: proxymetrics
+    url:
+      verified: "github.com/drsoft-oss/proxymetrics/"
     repository:
       owner: drsoft-oss
       name: homebrew-tap
@@ -132,12 +75,13 @@ brews:
     commit_author:
       name: goreleaserbot
       email: bot@drsoft-oss.dev
-    directory: Formula
     skip_upload: auto
-    install: |
-      bin.install "proxymetrics"
-    test: |
-      assert_match "proxymetrics", shell_output("#{bin}/proxymetrics --version")
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/proxymetrics"]
+          end
 
 release:
   github:

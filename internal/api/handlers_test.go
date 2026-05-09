@@ -12,12 +12,12 @@ import (
 	"github.com/drsoft-oss/proxymetrics/internal/api"
 	"github.com/drsoft-oss/proxymetrics/internal/broadcaster"
 	"github.com/drsoft-oss/proxymetrics/internal/store"
-	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/store/sqlite"
 )
 
-func newTestServer(t *testing.T) (*httptest.Server, *duckdb.Store) {
+func newTestServer(t *testing.T) (*httptest.Server, *sqlite.Store) {
 	t.Helper()
-	s, err := duckdb.Open(filepath.Join(t.TempDir(), "events.duckdb"))
+	s, err := sqlite.Open(filepath.Join(t.TempDir(), "events.db"))
 	if err != nil {
 		t.Fatal(err)
 	}

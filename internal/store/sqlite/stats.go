@@ -1,8 +1,7 @@
-package duckdb
+package sqlite
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"os"
 
@@ -21,7 +20,7 @@ func (s *Store) DBStats(ctx context.Context) (store.DBStats, error) {
 		out.Rows[t] = n
 	}
 
-	var oldest, newest sql.NullTime
+	var oldest, newest nullTimeText
 	if err := s.db.QueryRowContext(ctx, "SELECT MIN(ts), MAX(ts) FROM events").Scan(&oldest, &newest); err != nil {
 		return store.DBStats{}, fmt.Errorf("event ts range: %w", err)
 	}
@@ -40,12 +39,13 @@ func (s *Store) DBStats(ctx context.Context) (store.DBStats, error) {
 	return out, nil
 }
 
+// Vacuum truncates the WAL and rewrites the main DB file to reclaim space.
 func (s *Store) Vacuum(ctx context.Context) error {
-	if _, err := s.db.ExecContext(ctx, `CHECKPOINT`); err != nil {
-		return fmt.Errorf("checkpoint: %w", err)
+	if _, err := s.db.ExecContext(ctx, `PRAGMA wal_checkpoint(TRUNCATE)`); err != nil {
+		return fmt.Errorf("wal_checkpoint: %w", err)
 	}
-	if _, err := s.db.ExecContext(ctx, `PRAGMA force_checkpoint`); err != nil {
-		return fmt.Errorf("force_checkpoint: %w", err)
+	if _, err := s.db.ExecContext(ctx, `VACUUM`); err != nil {
+		return fmt.Errorf("vacuum: %w", err)
 	}
 	return nil
 }

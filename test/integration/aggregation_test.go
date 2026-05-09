@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/drsoft-oss/proxymetrics/internal/store"
-	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/store/sqlite"
 	"github.com/drsoft-oss/proxymetrics/test/integration"
 )
 
@@ -35,7 +35,7 @@ func TestE2E_RawEventsThenOverview(t *testing.T) {
 	deadline := time.Now().Add(5 * time.Second)
 	var rows []store.Event
 	for time.Now().Before(deadline) {
-		s, err := duckdb.Open(srv.DBPath)
+		s, err := sqlite.Open(srv.DBPath)
 		if err == nil {
 			rows, _ = s.TailEvents(context.Background(), store.TailOptions{N: 50})
 			s.Close()

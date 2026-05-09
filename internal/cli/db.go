@@ -15,7 +15,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/store/sqlite"
 )
 
 func dbCmd() *cobra.Command {
@@ -35,24 +35,49 @@ func dbSchemaCmd() *cobra.Command {
 			}
 			defer s.Close()
 
-			rows, err := s.QueryRollupSource(context.Background(), `
-				SELECT table_name, column_name, data_type
-				FROM information_schema.columns
-				WHERE table_schema = 'main'
-				ORDER BY table_name, ordinal_position`)
+			// SQLite has no information_schema; walk sqlite_master for tables and
+			// pragma_table_info for columns.
+			tableRows, err := s.QueryRollupSource(context.Background(), `
+				SELECT name FROM sqlite_master
+				WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
+				ORDER BY name`)
 			if err != nil {
 				return err
 			}
-			defer rows.Close()
+			var tables []string
+			for tableRows.Next() {
+				var t string
+				if err := tableRows.Scan(&t); err != nil {
+					tableRows.Close()
+					return err
+				}
+				tables = append(tables, t)
+			}
+			tableRows.Close()
+			if err := tableRows.Err(); err != nil {
+				return err
+			}
 
 			tw := tabwriter.NewWriter(os.Stdout, 0, 4, 2, ' ', 0)
 			fmt.Fprintln(tw, "TABLE\tCOLUMN\tTYPE")
-			for rows.Next() {
-				var table, col, typ string
-				if err := rows.Scan(&table, &col, &typ); err != nil {
+			for _, table := range tables {
+				colRows, err := s.QueryRollupSource(context.Background(),
+					`SELECT name, type FROM pragma_table_info(?) ORDER BY cid`, table)
+				if err != nil {
 					return err
 				}
-				fmt.Fprintf(tw, "%s\t%s\t%s\n", table, col, typ)
+				for colRows.Next() {
+					var col, typ string
+					if err := colRows.Scan(&col, &typ); err != nil {
+						colRows.Close()
+						return err
+					}
+					fmt.Fprintf(tw, "%s\t%s\t%s\n", table, col, typ)
+				}
+				colRows.Close()
+				if err := colRows.Err(); err != nil {
+					return err
+				}
 			}
 			return tw.Flush()
 		},
@@ -172,11 +197,11 @@ func dbRestoreCmd() *cobra.Command {
 				return fmt.Errorf("aborted")
 			}
 
-			dbPath := cfg.Storage.DataDir + "/events.duckdb"
+			dbPath := cfg.Storage.DataDir + "/events.db"
 			if _, statErr := os.Stat(dbPath); statErr == nil && !force {
-				probe, openErr := duckdb.Open(dbPath)
+				probe, openErr := sqlite.Open(dbPath)
 				if openErr != nil {
-					return fmt.Errorf("cannot acquire exclusive lock on events.duckdb (is `serve` running?): %w. Pass --force to override", openErr)
+					return fmt.Errorf("cannot acquire exclusive lock on events.db (is `serve` running?): %w. Pass --force to override", openErr)
 				}
 				probe.Close()
 			}

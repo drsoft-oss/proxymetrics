@@ -1,4 +1,4 @@
-package duckdb_test
+package sqlite_test
 
 import (
 	"context"
@@ -9,14 +9,14 @@ import (
 	"time"
 
 	"github.com/drsoft-oss/proxymetrics/internal/store"
-	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/store/sqlite"
 )
 
 func TestOpen_CreatesSchema(t *testing.T) {
 	dir := t.TempDir()
-	path := filepath.Join(dir, "events.duckdb")
+	path := filepath.Join(dir, "events.db")
 
-	s, err := duckdb.Open(path)
+	s, err := sqlite.Open(path)
 	if err != nil {
 		t.Fatalf("Open: %v", err)
 	}
@@ -30,10 +30,10 @@ func TestOpen_CreatesSchema(t *testing.T) {
 
 func TestOpen_Idempotent(t *testing.T) {
 	dir := t.TempDir()
-	path := filepath.Join(dir, "events.duckdb")
+	path := filepath.Join(dir, "events.db")
 
 	for i := 0; i < 2; i++ {
-		s, err := duckdb.Open(path)
+		s, err := sqlite.Open(path)
 		if err != nil {
 			t.Fatalf("Open #%d: %v", i, err)
 		}
@@ -41,9 +41,9 @@ func TestOpen_Idempotent(t *testing.T) {
 	}
 }
 
-func openTemp(t *testing.T) *duckdb.Store {
+func openTemp(t *testing.T) *sqlite.Store {
 	t.Helper()
-	s, err := duckdb.Open(filepath.Join(t.TempDir(), "events.duckdb"))
+	s, err := sqlite.Open(filepath.Join(t.TempDir(), "events.db"))
 	if err != nil {
 		t.Fatal(err)
 	}

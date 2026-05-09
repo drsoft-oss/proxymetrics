@@ -1,4 +1,4 @@
-package duckdb
+package sqlite
 
 import (
 	"context"
@@ -144,7 +144,6 @@ func (s *Store) StatusCodeDistribution(ctx context.Context, f store.EventFilter)
 		whereSQL = " WHERE " + strings.Join(where, " AND ")
 	}
 
-	// Aggregate per (status_code, status_class).
 	q := `SELECT status_code, status_class,
 	             COUNT(*) AS reqs,
 	             SUM(CASE WHEN status_class != '2xx' THEN cost_usd ELSE 0 END) AS wasted,
@@ -174,8 +173,6 @@ func (s *Store) StatusCodeDistribution(ctx context.Context, f store.EventFilter)
 		return nil, err
 	}
 
-	// Compute TopProviderVendor per (code) with a second query: vendor with highest count per code.
-	// At most ~50 distinct codes in practice, so we look them up in batch.
 	if len(out) == 0 {
 		return out, nil
 	}
@@ -185,7 +182,6 @@ func (s *Store) StatusCodeDistribution(ctx context.Context, f store.EventFilter)
 	}
 	ph := strings.TrimRight(strings.Repeat("?,", len(codes)), ",")
 
-	// Pull all (code, vendor, count) and pick the top vendor per code in Go.
 	q2 := `SELECT status_code, vendor, COUNT(*) AS reqs
 	       FROM events` + whereSQL
 	if whereSQL == "" {
@@ -238,7 +234,6 @@ func (s *Store) StatusCodeDetail(ctx context.Context, code int, f store.EventFil
 	args = append(args, code)
 	whereSQL := " WHERE " + strings.Join(where, " AND ")
 
-	// Totals + class.
 	var totals struct {
 		class  sql.NullString
 		reqs   int64
@@ -268,7 +263,6 @@ func (s *Store) StatusCodeDetail(ctx context.Context, code int, f store.EventFil
 		SpendUSD:  totals.spend,
 	}
 
-	// Top providers.
 	qp := `SELECT vendor, COUNT(*),
 	              SUM(CASE WHEN status_class != '2xx' THEN cost_usd ELSE 0 END),
 	              SUM(cost_usd)
@@ -293,7 +287,6 @@ func (s *Store) StatusCodeDetail(ctx context.Context, code int, f store.EventFil
 		return store.StatusCodeDetailResult{}, err
 	}
 
-	// Top targets.
 	qt := `SELECT target_host, COUNT(*),
 	              SUM(CASE WHEN status_class != '2xx' THEN cost_usd ELSE 0 END),
 	              SUM(cost_usd)
@@ -329,9 +322,6 @@ func (s *Store) RequestsByHour(ctx context.Context, groupBy string, now time.Tim
 		return nil, fmt.Errorf("RequestsByHour: invalid groupBy %q", groupBy)
 	}
 
-	// Trailing 24h window aligned to floor-of-hour buckets. Upper bound is the
-	// start of the next hour so the current in-progress hour's bucket is included
-	// (rollup ts_bucket is always a floor-of-hour timestamp).
 	to := now.Truncate(time.Hour).Add(time.Hour)
 	from := to.Add(-24 * time.Hour)
 

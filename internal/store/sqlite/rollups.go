@@ -1,4 +1,4 @@
-package duckdb
+package sqlite
 
 import (
 	"context"
@@ -71,7 +71,7 @@ func (s *Store) LatestRollupBucket(ctx context.Context, level string) (time.Time
 	if table == "" {
 		return time.Time{}, fmt.Errorf("rollups: invalid level %q", level)
 	}
-	var ts sql.NullTime
+	var ts nullTimeText
 	if err := s.db.QueryRowContext(ctx, `SELECT MAX(ts_bucket) FROM `+table).Scan(&ts); err != nil {
 		return time.Time{}, fmt.Errorf("latest rollup bucket: %w", err)
 	}

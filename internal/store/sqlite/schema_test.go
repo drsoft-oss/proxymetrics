@@ -1,4 +1,4 @@
-package duckdb
+package sqlite
 
 import (
 	"path/filepath"
@@ -7,7 +7,7 @@ import (
 
 func TestSchema_MigratesAuditRunsColumnsOnOldDB(t *testing.T) {
 	dir := t.TempDir()
-	path := filepath.Join(dir, "old.duckdb")
+	path := filepath.Join(dir, "old.db")
 
 	// First open creates the table with the new columns via the bootstrap.
 	s, err := Open(path)
@@ -24,8 +24,7 @@ func TestSchema_MigratesAuditRunsColumnsOnOldDB(t *testing.T) {
 		t.Fatalf("close: %v", err)
 	}
 
-	// Re-opening must run the ALTER ... ADD COLUMN IF NOT EXISTS migrations
-	// and put both columns back.
+	// Re-opening must run the migrations and put both columns back.
 	s2, err := Open(path)
 	if err != nil {
 		t.Fatalf("reopen: %v", err)
@@ -34,8 +33,7 @@ func TestSchema_MigratesAuditRunsColumnsOnOldDB(t *testing.T) {
 	for _, col := range []string{"session_key", "unique_ip_count"} {
 		var n int
 		err := s2.db.QueryRow(
-			`SELECT COUNT(*) FROM information_schema.columns
-			 WHERE table_name = 'audit_runs' AND column_name = ?`, col,
+			`SELECT COUNT(*) FROM pragma_table_info('audit_runs') WHERE name = ?`, col,
 		).Scan(&n)
 		if err != nil {
 			t.Fatalf("query %s: %v", col, err)
@@ -48,7 +46,7 @@ func TestSchema_MigratesAuditRunsColumnsOnOldDB(t *testing.T) {
 
 func TestSchema_AuditTablesExist(t *testing.T) {
 	dir := t.TempDir()
-	s, err := Open(filepath.Join(dir, "test.duckdb"))
+	s, err := Open(filepath.Join(dir, "test.db"))
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}
@@ -57,7 +55,7 @@ func TestSchema_AuditTablesExist(t *testing.T) {
 	for _, table := range []string{"audit_runs", "audit_requests", "geo_city_centroids"} {
 		var n int
 		err := s.db.QueryRow(
-			`SELECT COUNT(*) FROM information_schema.tables WHERE table_name = ?`, table,
+			`SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = ?`, table,
 		).Scan(&n)
 		if err != nil {
 			t.Fatalf("query %s: %v", table, err)
@@ -70,7 +68,7 @@ func TestSchema_AuditTablesExist(t *testing.T) {
 
 func TestSchema_AuditRuns_HasSessionRotationColumns(t *testing.T) {
 	dir := t.TempDir()
-	s, err := Open(filepath.Join(dir, "test.duckdb"))
+	s, err := Open(filepath.Join(dir, "test.db"))
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}
@@ -79,8 +77,7 @@ func TestSchema_AuditRuns_HasSessionRotationColumns(t *testing.T) {
 	for _, col := range []string{"session_key", "unique_ip_count"} {
 		var n int
 		err := s.db.QueryRow(
-			`SELECT COUNT(*) FROM information_schema.columns
-			 WHERE table_name = 'audit_runs' AND column_name = ?`, col,
+			`SELECT COUNT(*) FROM pragma_table_info('audit_runs') WHERE name = ?`, col,
 		).Scan(&n)
 		if err != nil {
 			t.Fatalf("query %s: %v", col, err)

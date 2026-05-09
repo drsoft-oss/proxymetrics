@@ -7,18 +7,16 @@ import (
 	"testing"
 	"time"
 
-	_ "github.com/marcboeker/go-duckdb/v2"
-
 	"github.com/drsoft-oss/proxymetrics/internal/audit"
-	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/store/sqlite"
 )
 
 func openTestStore(t *testing.T) (*audit.Store, *sql.DB, func()) {
 	t.Helper()
 	dir := t.TempDir()
-	s, err := duckdb.Open(filepath.Join(dir, "test.duckdb"))
+	s, err := sqlite.Open(filepath.Join(dir, "test.db"))
 	if err != nil {
-		t.Fatalf("open duckdb: %v", err)
+		t.Fatalf("open sqlite: %v", err)
 	}
 	as := audit.NewStore(s.DB())
 	cleanup := func() { _ = s.Close() }

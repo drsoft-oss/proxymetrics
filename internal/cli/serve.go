@@ -27,7 +27,7 @@ import (
 	"github.com/drsoft-oss/proxymetrics/internal/proxy/ca"
 	"github.com/drsoft-oss/proxymetrics/internal/proxy/core"
 	"github.com/drsoft-oss/proxymetrics/internal/rollup"
-	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/store/sqlite"
 	"github.com/drsoft-oss/proxymetrics/internal/ui"
 )
 
@@ -51,8 +51,8 @@ func runServe(cfg config.Config) error {
 	if err := os.MkdirAll(cfg.Storage.DataDir, 0o755); err != nil {
 		return fmt.Errorf("data dir: %w", err)
 	}
-	dbPath := filepath.Join(cfg.Storage.DataDir, "events.duckdb")
-	s, err := duckdb.Open(dbPath)
+	dbPath := filepath.Join(cfg.Storage.DataDir, "events.db")
+	s, err := sqlite.Open(dbPath)
 	if err != nil {
 		return err
 	}

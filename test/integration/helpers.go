@@ -21,7 +21,7 @@ import (
 
 	"github.com/drsoft-oss/proxymetrics/internal/cli"
 	"github.com/drsoft-oss/proxymetrics/internal/store"
-	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/store/sqlite"
 )
 
 // Server is the running proxymetrics instance under test.
@@ -80,16 +80,16 @@ func StartWithSeededProfile(t testing.TB, ipcheckURLs []string, p store.Profile)
 
 func seedProfile(t testing.TB, dataDir string, p store.Profile) {
 	t.Helper()
-	s, err := duckdb.Open(filepath.Join(dataDir, "events.duckdb"))
+	s, err := sqlite.Open(filepath.Join(dataDir, "events.db"))
 	if err != nil {
-		t.Fatalf("seed: open duckdb: %v", err)
+		t.Fatalf("seed: open sqlite: %v", err)
 	}
 	if err := s.CreateProfile(context.Background(), p); err != nil {
 		s.Close()
 		t.Fatalf("seed: create profile: %v", err)
 	}
 	if err := s.Close(); err != nil {
-		t.Fatalf("seed: close duckdb: %v", err)
+		t.Fatalf("seed: close sqlite: %v", err)
 	}
 }
 
@@ -147,7 +147,7 @@ logging:
 		DataDir:   dataDir,
 		ProxyAddr: fmt.Sprintf("127.0.0.1:%d", proxyPort),
 		APIAddr:   fmt.Sprintf("127.0.0.1:%d", apiPort),
-		DBPath:    filepath.Join(dataDir, "events.duckdb"),
+		DBPath:    filepath.Join(dataDir, "events.db"),
 	}
 }
 
@@ -217,7 +217,7 @@ func EventsAfter(t testing.TB, srv *Server, timeout time.Duration) []store.Event
 	t.Helper()
 	deadline := time.Now().Add(timeout)
 	for {
-		s, err := duckdb.Open(srv.DBPath)
+		s, err := sqlite.Open(srv.DBPath)
 		if err == nil {
 			rows, _ := s.TailEvents(context.Background(), store.TailOptions{N: 100})
 			s.Close()

@@ -7,12 +7,12 @@ import (
 
 	"github.com/drsoft-oss/proxymetrics/internal/rollup"
 	"github.com/drsoft-oss/proxymetrics/internal/store"
-	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/store/sqlite"
 )
 
-func openTempStore(t *testing.T) *duckdb.Store {
+func openTempStore(t *testing.T) *sqlite.Store {
 	t.Helper()
-	s, err := duckdb.Open(t.TempDir() + "/events.duckdb")
+	s, err := sqlite.Open(t.TempDir() + "/events.db")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -20,7 +20,7 @@ func openTempStore(t *testing.T) *duckdb.Store {
 	return s
 }
 
-func seedEvents(t *testing.T, s *duckdb.Store, events []store.Event) {
+func seedEvents(t *testing.T, s *sqlite.Store, events []store.Event) {
 	t.Helper()
 	if err := s.WriteEvents(context.Background(), events); err != nil {
 		t.Fatal(err)

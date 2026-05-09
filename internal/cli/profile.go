@@ -11,7 +11,7 @@ import (
 
 	"github.com/drsoft-oss/proxymetrics/internal/ipcheck"
 	"github.com/drsoft-oss/proxymetrics/internal/profile"
-	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/store/sqlite"
 )
 
 func profileCmd() *cobra.Command {
@@ -21,7 +21,7 @@ func profileCmd() *cobra.Command {
 }
 
 // openStoreAndRegistry is shared by every profile/events subcommand that needs the DB.
-func openStoreAndRegistry(cmd *cobra.Command) (*duckdb.Store, *profile.Registry, error) {
+func openStoreAndRegistry(cmd *cobra.Command) (*sqlite.Store, *profile.Registry, error) {
 	cfg, err := loadCfg(cmd)
 	if err != nil {
 		return nil, nil, err
@@ -29,7 +29,7 @@ func openStoreAndRegistry(cmd *cobra.Command) (*duckdb.Store, *profile.Registry,
 	if err := os.MkdirAll(cfg.Storage.DataDir, 0o755); err != nil {
 		return nil, nil, err
 	}
-	s, err := duckdb.Open(cfg.Storage.DataDir + "/events.duckdb")
+	s, err := sqlite.Open(cfg.Storage.DataDir + "/events.db")
 	if err != nil {
 		return nil, nil, err
 	}

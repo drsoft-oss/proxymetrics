@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/drsoft-oss/proxymetrics/internal/store"
-	"github.com/drsoft-oss/proxymetrics/internal/store/duckdb"
+	"github.com/drsoft-oss/proxymetrics/internal/store/sqlite"
 	"github.com/drsoft-oss/proxymetrics/test/integration"
 )
 
@@ -57,7 +57,7 @@ func TestBurst_AllEventsPersisted(t *testing.T) {
 	deadline := time.Now().Add(5 * time.Second)
 	var got int
 	for time.Now().Before(deadline) {
-		s, err := duckdb.Open(srv.DBPath)
+		s, err := sqlite.Open(srv.DBPath)
 		if err == nil {
 			rows, _ := s.TailEvents(context.Background(), store.TailOptions{N: N + 100, ProfileID: "fake-residential"})
 			s.Close()

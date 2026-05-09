@@ -1,9 +1,10 @@
-package duckdb
+package sqlite
 
 import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
@@ -91,11 +92,13 @@ func (s *Store) TailEvents(ctx context.Context, opts store.TailOptions) ([]store
 }
 
 func (s *Store) SumBytesInThisMonthByProfile(ctx context.Context) (map[string]int64, error) {
+	now := time.Now().UTC()
+	monthStart := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT profile_id, COALESCE(SUM(bytes_in), 0)
 		FROM events
-		WHERE ts >= date_trunc('month', current_timestamp AT TIME ZONE 'UTC')
-		GROUP BY profile_id`)
+		WHERE ts >= ?
+		GROUP BY profile_id`, monthStart)
 	if err != nil {
 		return nil, fmt.Errorf("sum bytes: %w", err)
 	}

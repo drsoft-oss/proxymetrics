@@ -1,11 +1,10 @@
-package duckdb
+package sqlite
 
 import (
 	"context"
 	"database/sql"
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/drsoft-oss/proxymetrics/internal/store"
@@ -52,7 +51,7 @@ func (s *Store) CreateProfile(ctx context.Context, p store.Profile) error {
 		nilIfEmpty(p.DefaultTeam), nilIfEmpty(p.DefaultProject),
 	)
 	if err != nil {
-		if isPKViolation(err) {
+		if isUniqueViolation(err) {
 			return store.ErrConflict
 		}
 		return fmt.Errorf("create profile: %w", err)
@@ -93,7 +92,7 @@ func (s *Store) UpsertProfileObserved(ctx context.Context, p store.Profile) erro
 			price_per_gb, price_per_gb_overage, included_gb, currency,
 			default_team, default_project)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-		ON CONFLICT (id) DO NOTHING`,
+		ON CONFLICT(id) DO NOTHING`,
 		p.ID, p.Label, p.Vendor, p.Type, nilIfEmpty(p.Region), p.UpstreamURL,
 		p.PricePerGB, p.PricePerGBOverage, p.IncludedGB, defaultStr(p.Currency, "USD"),
 		nilIfEmpty(p.DefaultTeam), nilIfEmpty(p.DefaultProject),
@@ -147,11 +146,6 @@ func defaultStr(s, dflt string) string {
 	return s
 }
 
-// DuckDB surfaces primary-key violations through error messages.
-func isPKViolation(err error) bool {
-	return err != nil && strings.Contains(err.Error(), "Duplicate key")
-}
-
 // ListProfilesWithUsage returns aggregated request count and USD spend per
 // profile_id over the trailing window, computed from the events table.
 // Profiles with no events in the window are NOT included; callers LEFT-JOIN
@@ -163,8 +157,8 @@ func (s *Store) ListProfilesWithUsage(ctx context.Context, window time.Duration)
 	cutoff := time.Now().UTC().Add(-window)
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT profile_id,
-		       COUNT(*)::BIGINT AS requests,
-		       COALESCE(SUM(cost_usd), 0)::DOUBLE AS spend_usd
+		       COUNT(*) AS requests,
+		       COALESCE(SUM(cost_usd), 0) AS spend_usd
 		FROM events
 		WHERE ts >= ?
 		GROUP BY profile_id`, cutoff)

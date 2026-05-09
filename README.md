@@ -35,7 +35,7 @@ whoever), and it records:
 - Provider, proxy type, price-per-GB — lifted out of the upstream username
 - Team / project tags — for chargeback
 
-Then it rolls those into 1-minute, 1-hour, and 1-day buckets in DuckDB and serves
+Then it rolls those into 1-minute, 1-hour, and 1-day buckets in SQLite and serves
 them to a dashboard that leads with the chart that matters: **dollars wasted on
 non-2xx responses, by provider, this billing cycle.**
 
@@ -62,7 +62,7 @@ non-2xx responses, by provider, this billing cycle.**
   `price-<cents>` credtag in the upstream username
 - **Sticky sessions** — preserve session keys end-to-end so vendor session
   affinity isn't broken
-- **DuckDB storage** — embedded, single-file, zero external services. Rollups run
+- **SQLite storage** — embedded, single-file, zero external services. Rollups run
   in-process on a 1-minute tick.
 - **Cross-platform** — Linux/macOS, amd64 + arm64
 
@@ -153,7 +153,7 @@ To tail events from the CLI instead:
                     ┌─────────────────────────────────────────────┐
                     │              ProxyMetrics binary            │
    ┌─────────┐      │  ┌──────────┐   ┌──────────┐   ┌─────────┐  │      ┌─────────────┐
-   │ scraper │ ─────┼─▶│  proxy   │──▶│ writer + │──▶│ DuckDB  │  │      │ Anonymous   │
+   │ scraper │ ─────┼─▶│  proxy   │──▶│ writer + │──▶│ SQLite  │  │      │ Anonymous   │
    │ (curl,  │      │  │  :8080   │   │ rollups  │   │  file   │  │      │  Proxies /  │
    │ Scrapy, │      │  │ (MITM)   │──┼┐          │   └─────────┘  │      │  Oxylabs /  │
    │ etc.)   │      │  └──────────┘  ││          │        ▲       │      │  upstream   │
@@ -174,14 +174,14 @@ To tail events from the CLI instead:
    the vendor never sees them.
 3. As bytes flow back, the proxy counts them and emits an event with status code,
    latency, byte counts, target host, profile, team, project, and computed cost.
-4. A buffered writer batches events into DuckDB. A rollup scheduler tickers every
+4. A buffered writer batches events into SQLite. A rollup scheduler tickers every
    minute, materializing 1-min/1-hour/1-day aggregates.
 5. The dashboard reads from rollup tables for charts and drills down to raw
    `events` rows on click.
 
 ### Storage layout
 
-- `data/events.duckdb` — single embedded file. Contains raw events, three rollup
+- `data/events.db` — single embedded file. Contains raw events, three rollup
   tables, profiles, audit runs and per-request rows.
 - `data/ca.{pem,der,key}` — generated MITM CA. Rotate with
   `proxymetrics cacert rotate`.
@@ -228,7 +228,7 @@ via ipapi.is (with MaxMind GeoLite2 as fallback), and returns:
 - Unique IP count (pool diversity)
 - Per-request table with observed IP, geo, ASN, datacenter/VPN flags
 
-Audit reports persist to DuckDB; share one by linking to the run ID.
+Audit reports persist to SQLite; share one by linking to the run ID.
 
 ---
 
@@ -242,7 +242,7 @@ proxymetrics cacert path         # print absolute paths to CA files
 proxymetrics cacert rotate       # archive old CA, generate a new one
 proxymetrics profile list        # tabular view of observed profiles
 proxymetrics profile test <id>   # send one IP-check request via this profile
-proxymetrics events tail -n 100  # tail recent rows from DuckDB
+proxymetrics events tail -n 100  # tail recent rows from SQLite
 proxymetrics db ...              # low-level DB inspection
 proxymetrics version             # print version, git commit, build date
 proxymetrics config check        # validate config.yaml
@@ -264,7 +264,7 @@ server:
   deployment_secret: "${PROXYMETRICS_SECRET}"
 
 storage:
-  data_dir: "./data"             # DuckDB file + CA + maxmind dir
+  data_dir: "./data"             # SQLite file + CA + maxmind dir
 
 events:
   channel_size: 10000            # in-memory event buffer
@@ -304,7 +304,7 @@ internal/
   audit/             audit module: manager, runner, geo verdict, store
   proxy/             MITM core, CA, credtag parsing
   profile/           upstream profile registry + HTTP CRUD
-  store/             DuckDB store, schema, queries
+  store/             SQLite store, schema, queries
   rollup/            1-min/1-hour/1-day aggregator
   events/            buffered writer
   geo/               ipapi.is + MaxMind cascade
