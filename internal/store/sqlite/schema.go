@@ -44,6 +44,8 @@ CREATE TABLE IF NOT EXISTS events (
   project           TEXT
 );
 
+CREATE INDEX IF NOT EXISTS events_ts_idx ON events(ts);
+
 CREATE TABLE IF NOT EXISTS rollups_1min (
   ts_bucket    DATETIME NOT NULL,
   profile_id   TEXT     NOT NULL,
