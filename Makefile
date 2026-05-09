@@ -65,4 +65,65 @@ clean: ## Remove build artifacts (./data is left alone)
 	rm -rf $(UI_SRC)/.vite
 	@find $(UI_DIST_DST) -mindepth 1 ! -name 'index.html' -delete
 
-.PHONY: help build-ui build test test-integration test-ui bench lint fmt tidy clean dev dev-go dev-ui
+release: ## Tag the next semver from commits and push to GitHub (triggers release CI). Use VERSION=vX.Y.Z to override.
+	@if [ -n "$$(git status --porcelain)" ]; then \
+	  echo "error: working tree is dirty. Commit or stash before releasing." >&2; \
+	  exit 1; \
+	fi; \
+	branch=$$(git rev-parse --abbrev-ref HEAD); \
+	if [ "$$branch" != "main" ]; then \
+	  echo "error: must be on main branch (currently on $$branch)" >&2; \
+	  exit 1; \
+	fi; \
+	git fetch --quiet origin main; \
+	if [ -n "$$(git rev-list HEAD..origin/main)" ]; then \
+	  echo "error: local main is behind origin/main. Pull first." >&2; \
+	  exit 1; \
+	fi; \
+	current=$$(git tag --list 'v*.*.*' | sort -V | tail -n 1); \
+	if [ -n "$${VERSION:-}" ]; then \
+	  next="$$VERSION"; \
+	  bump_kind="forced"; \
+	  if ! echo "$$next" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$$'; then \
+	    echo "error: VERSION=$$next must match v<major>.<minor>.<patch>" >&2; \
+	    exit 1; \
+	  fi; \
+	else \
+	  if ! command -v svu >/dev/null 2>&1; then \
+	    echo "error: svu not found — install with: brew install caarlos0/tap/svu" >&2; \
+	    exit 1; \
+	  fi; \
+	  if [ -z "$$current" ]; then \
+	    next="v0.1.0"; \
+	    bump_kind="first release"; \
+	  else \
+	    next=$$(svu next); \
+	    if [ "$$next" = "$$current" ]; then \
+	      echo "error: no release-worthy commits since $$current (only chore/docs/ci/...). Use VERSION= to force." >&2; \
+	      exit 1; \
+	    fi; \
+	    bump_kind="bumped from $$current"; \
+	  fi; \
+	fi; \
+	if git rev-parse --verify --quiet "$$next" >/dev/null; then \
+	  echo "error: tag $$next already exists locally. Delete it or pass VERSION=" >&2; \
+	  exit 1; \
+	fi; \
+	current_display=$${current:-none}; \
+	echo "Current tag : $$current_display"; \
+	echo "Next tag    : $$next  ($$bump_kind)"; \
+	echo "Commits in this release:"; \
+	if [ -z "$$current" ]; then \
+	  git log --oneline; \
+	else \
+	  git log --oneline "$$current"..HEAD; \
+	fi; \
+	printf "Proceed? [y/N] "; \
+	read -r reply; \
+	case "$$reply" in y|Y) ;; *) echo "aborted."; exit 1;; esac; \
+	git tag -a "$$next" -m "Release $$next"; \
+	git push origin main; \
+	git push origin "$$next"; \
+	echo "released $$next"
+
+.PHONY: help build-ui build test test-integration test-ui bench lint fmt tidy clean dev dev-go dev-ui release
