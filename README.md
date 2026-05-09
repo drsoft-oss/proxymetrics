@@ -112,6 +112,11 @@ server** below and continue at **Trust the CA**.
 
 ### Run the server
 
+The binary needs a config file — by default `./config.yaml` (override with
+`-c <path>` or `$PROXYMETRICS_CONFIG`), and it exits if that path is missing.
+`config.example.yaml` in this repo is the template; copy it to `config.yaml`
+and edit.
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/drsoft-oss/proxymetrics/main/config.example.yaml -o config.yaml
 export PROXYMETRICS_SECRET=$(openssl rand -hex 16)
@@ -290,7 +295,9 @@ All commands accept `-c <path>` for the config file. The default is
 
 ## Configuration
 
-`config.example.yaml` is the canonical reference. The fields you'll touch:
+A config file is required at the path passed to `-c` (default `./config.yaml`);
+`config.example.yaml` in this repo is the template — copy it to `config.yaml`
+and edit. The fields you'll touch:
 
 ```yaml
 server:
