@@ -124,8 +124,11 @@ export PROXYMETRICS_SECRET=$(openssl rand -hex 16)
 proxymetrics serve -c config.yaml
 ```
 
-`serve` generates the MITM CA on first run and stores it under `./data/`.
-That's the server. Now wire a client up.
+On first run, `serve` generates the MITM CA under `storage.data_dir`
+(`./data/ca.{pem,der,key}`) and reuses it on every subsequent start. You don't
+need to run `proxymetrics cacert init` first — that command exists only if you
+want to pre-generate the CA out of band (e.g. in CI, or to ship the cert to
+clients before the server is up). That's the server. Now wire a client up.
 
 ### 1. Trust the CA
 
@@ -275,8 +278,8 @@ Audit reports persist to SQLite; share one by linking to the run ID.
 ## CLI reference
 
 ```
-proxymetrics serve               # run the proxy + admin servers
-proxymetrics cacert init         # generate the MITM CA on first run
+proxymetrics serve               # run the proxy + admin servers (auto-generates the CA on first run)
+proxymetrics cacert init         # pre-generate the CA without starting the server (optional; serve does this itself)
 proxymetrics cacert show         # print PEM, fingerprint, validity
 proxymetrics cacert path         # print absolute paths to CA files
 proxymetrics cacert rotate       # archive old CA, generate a new one
