@@ -70,19 +70,29 @@ non-2xx responses, by provider, this billing cycle.**
 
 ## Quickstart (5 minutes)
 
-You need: Go 1.25+, Node 20+, pnpm, and a real upstream proxy URL from any vendor.
+You need a real upstream proxy URL from any vendor (Anonymous Proxies, Bright
+Data, Oxylabs, IPRoyal, Smartproxy, …).
+
+### Install
 
 ```bash
-git clone https://github.com/drsoft-oss/proxymetrics
-cd proxymetrics
-
-make build
-export PROXYMETRICS_SECRET=$(openssl rand -hex 16)
-
-./bin/proxymetrics cacert init -c config.example.yaml
-./bin/proxymetrics serve     -c config.example.yaml
+brew install drsoft-oss/tap/proxymetrics
 ```
 
+Or grab a prebuilt binary for your OS/arch from the [latest GitHub
+release](https://github.com/drsoft-oss/proxymetrics/releases/latest) and put it
+on your `$PATH`.
+
+### Run the server
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/drsoft-oss/proxymetrics/main/config.example.yaml -o config.yaml
+export PROXYMETRICS_SECRET=$(openssl rand -hex 16)
+
+proxymetrics serve -c config.yaml
+```
+
+`serve` generates the MITM CA on first run and stores it under `./data/`.
 That's the server. Now wire a client up.
 
 ### 1. Trust the CA
@@ -122,7 +132,7 @@ forwarded to the vendor verbatim:
 Example upstream URL (Anonymous Proxies, residential, US, $4/GB):
 
 ```
-http://customer-acme-zone-residential-country-us-provider-anonymous-type-residential-price-400:upstream_password@brd.superproxy.io:22225
+http://customer-acme-zone-residential-country-us-provider-anonymous-type-residential-price-400:upstream_password@rotating.dnsproxifier.com:31230
 ```
 
 ### 3. Send a request
@@ -142,7 +152,7 @@ traffic stream, the providers page, and the per-target table.
 To tail events from the CLI instead:
 
 ```bash
-./bin/proxymetrics events tail -c config.example.yaml
+proxymetrics events tail -c config.yaml
 ```
 
 ---
@@ -189,9 +199,7 @@ To tail events from the CLI instead:
   enable the MaxMind fallback for audits when ipapi.is is unreachable.
 - `config.yaml` — listen ports, retention windows, batch sizes, default tags.
 
-Nothing else. No Postgres, no Redis, no Prometheus required (Prometheus support
-is on the v2 roadmap if you want to wire it into an existing observability
-stack).
+Nothing else. No Postgres, no Redis, no Prometheus required.
 
 ---
 
@@ -318,23 +326,6 @@ UI builds copy into `internal/ui/ui-dist/` and are embedded via `//go:embed` at
 
 ---
 
-## What's not in v1
-
-These are explicitly *out of scope* for the open-source build, by design:
-
-- A scraper or crawler (use Scrapy, Crawlee, Playwright)
-- CAPTCHA solving
-- Browser automation
-- Multi-tenant / RBAC (single-tenant only — that's the hosted Pro wedge)
-- Prometheus exporter (planned for v2)
-- Cost-aware routing rules / budget guardrails / anomaly detection (v2)
-- OpenTelemetry traces (v2)
-
-The roadmap lives in `research/oss-freebie-tool-shortlist.md` and the per-feature
-specs in `docs/superpowers/specs/`.
-
----
-
 ## Troubleshooting
 
 **"x509: unknown authority" from my client.** Your client doesn't trust the CA.
@@ -358,7 +349,7 @@ dropping `GeoLite2-City.mmdb` and `GeoLite2-Connection-Type.mmdb` into
 
 ## License
 
-MIT — see `LICENSE` once it lands in the packaging milestone.
+MIT — see [`LICENSE`](LICENSE).
 
 ---
 

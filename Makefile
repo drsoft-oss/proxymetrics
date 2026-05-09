@@ -10,9 +10,19 @@ UI_SRC := ui
 UI_DIST_SRC := ui/dist
 UI_DIST_DST := internal/ui/ui-dist
 
-LDFLAGS := -X github.com/drsoft-oss/proxymetrics/internal/cli.Version=$(shell git describe --tags --always --dirty 2>/dev/null || echo dev) \
-           -X github.com/drsoft-oss/proxymetrics/internal/cli.GitCommit=$(shell git rev-parse --short HEAD 2>/dev/null || echo none) \
-           -X github.com/drsoft-oss/proxymetrics/internal/cli.BuildDate=$(shell date -u +%Y-%m-%dT%H:%M:%SZ)
+VERSION    ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
+GIT_COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo none)
+BUILD_DATE ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
+
+LDFLAGS := -X github.com/drsoft-oss/proxymetrics/internal/cli.Version=$(VERSION) \
+           -X github.com/drsoft-oss/proxymetrics/internal/cli.GitCommit=$(GIT_COMMIT) \
+           -X github.com/drsoft-oss/proxymetrics/internal/cli.BuildDate=$(BUILD_DATE)
+
+DOCKER_REGISTRY  ?= docker.io
+DOCKER_IMAGE     ?= drsoft/proxymetrics
+DOCKER_PLATFORMS ?= linux/amd64,linux/arm64
+DOCKER_REF       := $(DOCKER_REGISTRY)/$(DOCKER_IMAGE)
+DOCKER_BUILDER   ?= proxymetrics-builder
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
@@ -64,6 +74,43 @@ clean: ## Remove build artifacts (./data is left alone)
 	rm -rf $(UI_SRC)/dist
 	rm -rf $(UI_SRC)/.vite
 	@find $(UI_DIST_DST) -mindepth 1 ! -name 'index.html' -delete
+
+docker-build: ## Build a single-arch image locally as $(DOCKER_IMAGE):$(VERSION) (and :dev)
+	docker build \
+	  --build-arg VERSION=$(VERSION) \
+	  --build-arg GIT_COMMIT=$(GIT_COMMIT) \
+	  --build-arg BUILD_DATE=$(BUILD_DATE) \
+	  -t $(DOCKER_IMAGE):$(VERSION) \
+	  -t $(DOCKER_IMAGE):dev \
+	  .
+
+docker-push: ## Build multi-arch and push to Docker Hub. Requires `docker login` + a clean semver tag. Override with VERSION=vX.Y.Z.
+	@if ! echo "$(VERSION)" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$$'; then \
+	  echo "error: VERSION=$(VERSION) is not a clean semver tag (expected vX.Y.Z[-prerelease])." >&2; \
+	  echo "       Tag a release first ('make release') or override with VERSION=v1.2.3." >&2; \
+	  exit 1; \
+	fi
+	@if ! docker buildx inspect $(DOCKER_BUILDER) >/dev/null 2>&1; then \
+	  echo "creating buildx builder '$(DOCKER_BUILDER)'..."; \
+	  docker buildx create --name $(DOCKER_BUILDER) --use >/dev/null; \
+	  docker buildx inspect --bootstrap >/dev/null; \
+	else \
+	  docker buildx use $(DOCKER_BUILDER) >/dev/null; \
+	fi
+	@case "$(VERSION)" in \
+	  *-*) extra_tag=""; latest_note="(prerelease — :latest not updated)" ;; \
+	  *)   extra_tag="-t $(DOCKER_REF):latest"; latest_note="and :latest" ;; \
+	esac; \
+	docker buildx build \
+	  --platform $(DOCKER_PLATFORMS) \
+	  --build-arg VERSION=$(VERSION) \
+	  --build-arg GIT_COMMIT=$(GIT_COMMIT) \
+	  --build-arg BUILD_DATE=$(BUILD_DATE) \
+	  -t $(DOCKER_REF):$(VERSION) \
+	  $$extra_tag \
+	  --push \
+	  . && \
+	echo "pushed $(DOCKER_REF):$(VERSION) $$latest_note"
 
 release: ## Tag the next semver from commits and push to GitHub (triggers release CI). Use VERSION=vX.Y.Z to override.
 	@if [ -n "$$(git status --porcelain)" ]; then \
@@ -126,4 +173,4 @@ release: ## Tag the next semver from commits and push to GitHub (triggers releas
 	git push origin "$$next" || { echo "error: push of tag $$next failed. Local tag exists. Recover with: git push origin $$next" >&2; exit 1; }; \
 	echo "released $$next"
 
-.PHONY: help build-ui build test test-integration test-ui bench lint fmt tidy clean dev dev-go dev-ui release
+.PHONY: help build-ui build test test-integration test-ui bench lint fmt tidy clean dev dev-go dev-ui docker-build docker-push release

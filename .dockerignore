@@ -1,0 +1,32 @@
+.git
+.gitignore
+.dockerignore
+Dockerfile
+
+# Build artifacts
+bin/
+dist/
+ui/node_modules/
+ui/dist/
+ui/.vite/
+
+# Local state
+data/
+.env
+.env.local
+.DS_Store
+coverage.out
+*.duckdb
+*.duckdb.wal
+
+# Editor / tool config
+.idea/
+.vscode/
+.claude/
+.superpowers/
+.air.toml
+
+# Not needed at build time
+docs/
+research/
+.github/
