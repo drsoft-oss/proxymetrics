@@ -1,5 +1,7 @@
 # ProxyMetrics
 
+![ProxyMetrics](proxymetrics.avif)
+
 Know what's actually happening on your proxy stack. Self-hosted MITM router + dashboard
 that records every request — status, latency, bytes, target, exit IP geo, and cost — 
 across every vendor you use, then rolls it up so you can compare providers, audit pool 
