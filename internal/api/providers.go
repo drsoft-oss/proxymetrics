@@ -364,6 +364,7 @@ func eventFilterToRollup(f store.EventFilter, level string) store.RollupFilter {
 		Teams:         f.Teams,
 		Projects:      f.Projects,
 		StatusClasses: f.StatusClasses,
+		CaptchaKinds:  f.CaptchaKinds,
 		TargetHost:    f.TargetHost,
 		Q:             f.Q,
 		Limit:         100000,
