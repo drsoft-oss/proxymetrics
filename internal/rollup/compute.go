@@ -71,10 +71,11 @@ SELECT
   GROUP_CONCAT(latency_ms),
   SUM(cost_usd),
   SUM(CASE WHEN status_class = '2xx' THEN 1 ELSE 0 END),
-  SUM(CASE WHEN status_class != '2xx' THEN 1 ELSE 0 END)
+  SUM(CASE WHEN status_class != '2xx' THEN 1 ELSE 0 END),
+  captcha_kind
 FROM events
 WHERE ts >= ? AND ts < ?
-GROUP BY 1, profile_id, vendor, type, region, status_class, target_host, team, project
+GROUP BY 1, profile_id, vendor, type, region, status_class, target_host, team, project, captcha_kind
 `, bucketExpr)
 
 	rows, err := c.QueryRollupSource(ctx, q, from, to)
@@ -95,6 +96,7 @@ GROUP BY 1, profile_id, vendor, type, region, status_class, target_host, team, p
 			&r.RequestCount, &r.BytesInTotal, &r.BytesOutTotal,
 			&r.LatencyMSAvg, &latencies,
 			&r.CostUSDTotal, &r.SuccessCount, &r.FailureCount,
+			&r.CaptchaKind,
 		); err != nil {
 			return err
 		}

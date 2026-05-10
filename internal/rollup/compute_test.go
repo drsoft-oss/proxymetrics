@@ -88,3 +88,39 @@ func TestCompute_BadLevel(t *testing.T) {
 		t.Fatal("want error")
 	}
 }
+
+func TestCompute_GroupsByCaptchaKind(t *testing.T) {
+	s := openTempStore(t)
+	ctx := context.Background()
+
+	bucket := time.Date(2026, 5, 10, 12, 30, 0, 0, time.UTC)
+	seedEvents(t, s, []store.Event{
+		{TS: bucket.Add(1 * time.Second), RequestID: "r1", ProfileID: "p1", Vendor: "v", Type: "residential",
+			StatusCode: 200, StatusClass: "2xx", CaptchaKind: "recaptcha",
+			BytesIn: 100, BytesOut: 10, LatencyMS: 10, CostUSD: 0.0},
+		{TS: bucket.Add(2 * time.Second), RequestID: "r2", ProfileID: "p1", Vendor: "v", Type: "residential",
+			StatusCode: 200, StatusClass: "2xx", CaptchaKind: "turnstile",
+			BytesIn: 100, BytesOut: 10, LatencyMS: 10, CostUSD: 0.0},
+		{TS: bucket.Add(3 * time.Second), RequestID: "r3", ProfileID: "p1", Vendor: "v", Type: "residential",
+			StatusCode: 200, StatusClass: "2xx", CaptchaKind: "",
+			BytesIn: 100, BytesOut: 10, LatencyMS: 10, CostUSD: 0.0},
+	})
+
+	if err := rollup.Compute(ctx, s, "1min", bucket, bucket.Add(time.Minute)); err != nil {
+		t.Fatalf("compute: %v", err)
+	}
+	rows, err := s.QueryRollups(ctx, store.RollupFilter{Level: "1min", From: bucket, To: bucket.Add(time.Minute)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 3 {
+		t.Fatalf("got %d rows, want 3: %+v", len(rows), rows)
+	}
+	seen := map[string]int64{}
+	for _, r := range rows {
+		seen[r.CaptchaKind] = r.RequestCount
+	}
+	if seen["recaptcha"] != 1 || seen["turnstile"] != 1 || seen[""] != 1 {
+		t.Fatalf("counts wrong: %+v", seen)
+	}
+}
