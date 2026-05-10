@@ -155,9 +155,18 @@ func New(cfg Config) (*goproxy.ProxyHttpServer, error) {
 		}
 		t.statusCode = resp.StatusCode
 		if resp.Body != nil {
+			counted := &countingReadCloser{rc: resp.Body, w: &t.bytesIn}
+			scanned, scanner := wrapForCaptcha(
+				counted,
+				resp.Header.Get("Content-Type"),
+				resp.Header.Get("Content-Encoding"),
+			)
 			resp.Body = &finalizingReadCloser{
-				rc:      &countingReadCloser{rc: resp.Body, w: &t.bytesIn},
-				onClose: func() { t.emit(nil) },
+				rc: readCloserOver(scanned, counted),
+				onClose: func() {
+					t.captchaKind = scanner.Kind()
+					t.emit(nil)
+				},
 			}
 		} else {
 			t.emit(nil)
@@ -421,3 +430,18 @@ func (f *finalizingReadCloser) Close() error {
 	}
 	return err
 }
+
+// readCloserOver adapts an io.Reader (the scanner) plus the original
+// io.Closer (the underlying body) into an io.ReadCloser. The scanner is
+// purely a Reader; closing must propagate to the underlying body.
+func readCloserOver(r io.Reader, c io.Closer) io.ReadCloser {
+	return readerCloser{r: r, c: c}
+}
+
+type readerCloser struct {
+	r io.Reader
+	c io.Closer
+}
+
+func (rc readerCloser) Read(p []byte) (int, error) { return rc.r.Read(p) }
+func (rc readerCloser) Close() error               { return rc.c.Close() }
