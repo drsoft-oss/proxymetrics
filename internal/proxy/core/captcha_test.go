@@ -108,6 +108,44 @@ func TestCaptchaScanner_PassthroughBytesUnchanged(t *testing.T) {
 	}
 }
 
+func TestCaptchaScanner_SkipsBinaryTypes(t *testing.T) {
+	body := []byte(`<div class="g-recaptcha"></div>`) // would match if scanned
+	for _, ct := range []string{
+		"image/jpeg",
+		"application/octet-stream",
+		"video/mp4",
+		"application/json",
+		"",
+	} {
+		r, sc := wrapForCaptcha(bytes.NewReader(body), ct, "")
+		if _, err := io.ReadAll(r); err != nil {
+			t.Fatalf("ct=%q: %v", ct, err)
+		}
+		if got := sc.Kind(); got != "" {
+			t.Fatalf("ct=%q: scanned and matched %q (should have skipped)", ct, got)
+		}
+	}
+}
+
+func TestCaptchaScanner_AcceptsScannableTypes(t *testing.T) {
+	body := []byte(`<div class="g-recaptcha"></div>`)
+	for _, ct := range []string{
+		"text/html",
+		"text/html; charset=utf-8",
+		"TEXT/HTML",
+		"application/xhtml+xml",
+		"text/plain",
+	} {
+		r, sc := wrapForCaptcha(bytes.NewReader(body), ct, "")
+		if _, err := io.ReadAll(r); err != nil {
+			t.Fatalf("ct=%q: %v", ct, err)
+		}
+		if got := sc.Kind(); got != "recaptcha" {
+			t.Fatalf("ct=%q: got %q want recaptcha", ct, got)
+		}
+	}
+}
+
 // slowReader returns at most `step` bytes per Read; used to force chunk boundaries.
 type slowReader struct {
 	src  io.Reader
