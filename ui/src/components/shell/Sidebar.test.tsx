@@ -12,7 +12,7 @@ async function setup(initial: string) {
       </>
     ),
   });
-  const childRoutes = ["/", "/providers", "/targets", "/status-codes", "/live-traffic", "/audits", "/profiles", "/settings"].map(
+  const childRoutes = ["/", "/providers", "/targets", "/status-codes", "/captchas", "/live-traffic", "/audits", "/profiles", "/settings"].map(
     (p) =>
       createRoute({
         getParentRoute: () => rootRoute,
@@ -31,13 +31,14 @@ async function setup(initial: string) {
 }
 
 describe("Sidebar", () => {
-  it("renders all 8 nav items with the right labels", async () => {
+  it("renders all 9 nav items with the right labels", async () => {
     await setup("/");
     for (const label of [
       "Overview",
       "Providers",
       "Targets",
       "Status Codes",
+      "Captchas",
       "Live Traffic",
       "Audits",
       "Profiles",

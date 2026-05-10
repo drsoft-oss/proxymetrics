@@ -1,7 +1,8 @@
 import { Link, useMatchRoute } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard, Server, Target, Hash, Activity, ClipboardCheck, Users, Settings as SettingsIcon,
+  LayoutDashboard, Server, Target, Hash, Activity, ClipboardCheck, Users,
+  Settings as SettingsIcon, ShieldAlert,
 } from "lucide-react";
 
 type Item = { to: string; label: string; icon: React.ComponentType<{ className?: string }>; comingSoon?: boolean };
@@ -11,6 +12,7 @@ const items: Item[] = [
   { to: "/providers", label: "Providers", icon: Server },
   { to: "/targets", label: "Targets", icon: Target },
   { to: "/status-codes", label: "Status Codes", icon: Hash },
+  { to: "/captchas",     label: "Captchas",     icon: ShieldAlert },
   { to: "/live-traffic", label: "Live Traffic", icon: Activity },
   { to: "/audits", label: "Audits", icon: ClipboardCheck },
   { to: "/profiles", label: "Profiles", icon: Users },
