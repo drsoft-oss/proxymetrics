@@ -219,7 +219,7 @@ func aggregateByTarget(ctx context.Context, s store.Store, source string,
 	cb func(host, statusClass string, ts time.Time, req, succ, fail, bytesTotal int64, spend float64),
 ) error {
 	if source == "events" {
-		rows, _, err := s.QueryEvents(ctx, ef)
+		rows, _, err := s.QueryEvents(ctx, eventFilterForAggregate(ef))
 		if err != nil {
 			return err
 		}

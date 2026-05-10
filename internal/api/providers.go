@@ -299,7 +299,7 @@ func aggregateBy(ctx context.Context, s store.Store, source string,
 		req, succ, fail, bytesTotal int64, spend, latencyAvg float64, p50, p95, p99 int),
 ) error {
 	if source == "events" {
-		rows, _, err := s.QueryEvents(ctx, ef)
+		rows, _, err := s.QueryEvents(ctx, eventFilterForAggregate(ef))
 		if err != nil {
 			return err
 		}
@@ -348,6 +348,16 @@ func buildSparkline(buckets []store.RequestsByHourBucket, length int, now time.T
 		out[b.Key] = s
 	}
 	return out
+}
+
+// eventFilterForAggregate returns a copy of f with its Limit bumped so the
+// events source returns every row in the window, not just the user's display
+// page size. ParseEventFilter defaults Limit to 50 for the list endpoint;
+// aggregate handlers reduce rows internally and need them all.
+func eventFilterForAggregate(f store.EventFilter) store.EventFilter {
+	f.Limit = 100000
+	f.Offset = 0
+	return f
 }
 
 // eventFilterToRollup translates an EventFilter into a RollupFilter with the

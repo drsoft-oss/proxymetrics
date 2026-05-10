@@ -161,7 +161,7 @@ func aggregateCaptcha(ctx context.Context, s store.Store, source string,
 	cb func(vendor, typ, kind string, req int64),
 ) error {
 	if source == "events" {
-		rows, _, err := s.QueryEvents(ctx, ef)
+		rows, _, err := s.QueryEvents(ctx, eventFilterForAggregate(ef))
 		if err != nil {
 			return err
 		}

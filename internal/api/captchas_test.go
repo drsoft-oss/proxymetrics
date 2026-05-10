@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"testing"
 	"time"
 
@@ -159,6 +160,42 @@ func TestCaptchas_DetailUnknownKind(t *testing.T) {
 	defer resp.Body.Close()
 	if resp.StatusCode != 400 {
 		t.Fatalf("status: %d, want 400", resp.StatusCode)
+	}
+}
+
+func TestCaptchas_DistributionDoesNotTruncateAtDefaultLimit(t *testing.T) {
+	srv, s := newTestServer(t)
+	ctx := context.Background()
+	now := time.Now().UTC()
+
+	// Write 60 events — more than ParseEventFilter's default Limit of 50.
+	events := make([]store.Event, 0, 60)
+	for i := 0; i < 60; i++ {
+		events = append(events, store.Event{
+			TS: now, RequestID: "r" + strconv.Itoa(i),
+			ProfileID: "p1", Vendor: "v", Type: "t",
+			StatusCode: 200, StatusClass: "2xx",
+			CaptchaKind: "recaptcha",
+		})
+	}
+	_ = s.WriteEvents(ctx, events)
+
+	resp, err := http.Get(srv.URL + "/api/v1/captchas/distribution")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	var body struct {
+		Items []struct {
+			Kind     string `json:"kind"`
+			Requests int64  `json:"requests"`
+		} `json:"items"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		t.Fatal(err)
+	}
+	if len(body.Items) != 1 || body.Items[0].Requests != 60 {
+		t.Fatalf("expected 60 recaptcha events, got %+v", body.Items)
 	}
 }
 
