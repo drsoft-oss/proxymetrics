@@ -41,7 +41,8 @@ CREATE TABLE IF NOT EXISTS events (
   latency_ms        INTEGER  NOT NULL,
   cost_usd          REAL     NOT NULL,
   team              TEXT,
-  project           TEXT
+  project           TEXT,
+  captcha_kind      TEXT     NOT NULL DEFAULT ''
 );
 
 CREATE INDEX IF NOT EXISTS events_ts_idx ON events(ts);
@@ -65,7 +66,8 @@ CREATE TABLE IF NOT EXISTS rollups_1min (
   latency_ms_p99  INTEGER,
   cost_usd_total  REAL    NOT NULL,
   success_count   INTEGER NOT NULL,
-  failure_count   INTEGER NOT NULL
+  failure_count   INTEGER NOT NULL,
+  captcha_kind    TEXT    NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS rollups_1hour (
@@ -87,7 +89,8 @@ CREATE TABLE IF NOT EXISTS rollups_1hour (
   latency_ms_p99  INTEGER,
   cost_usd_total  REAL    NOT NULL,
   success_count   INTEGER NOT NULL,
-  failure_count   INTEGER NOT NULL
+  failure_count   INTEGER NOT NULL,
+  captcha_kind    TEXT    NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS rollups_1day (
@@ -109,7 +112,8 @@ CREATE TABLE IF NOT EXISTS rollups_1day (
   latency_ms_p99  INTEGER,
   cost_usd_total  REAL    NOT NULL,
   success_count   INTEGER NOT NULL,
-  failure_count   INTEGER NOT NULL
+  failure_count   INTEGER NOT NULL,
+  captcha_kind    TEXT    NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS audit_runs (
