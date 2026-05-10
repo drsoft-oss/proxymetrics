@@ -1,6 +1,8 @@
 package core
 
 import (
+	"io"
+	"strings"
 	"testing"
 )
 
@@ -40,4 +42,50 @@ func TestCaptchaMatch_NoFalsePositiveOnLargeText(t *testing.T) {
 	if got := captchaMatchAll(body); got != "" {
 		t.Fatalf("false positive: %q", got)
 	}
+}
+
+func TestCaptchaScanner_BoundaryHit(t *testing.T) {
+	body := `<html><body><div class="g-recaptcha"></div></body></html>`
+	r, sc := wrapForCaptcha(slowReader{src: strings.NewReader(body), step: 1}, "text/html", "")
+	if _, err := io.ReadAll(r); err != nil {
+		t.Fatal(err)
+	}
+	if got := sc.Kind(); got != "recaptcha" {
+		t.Fatalf("got %q want recaptcha", got)
+	}
+}
+
+func TestCaptchaScanner_NoMatch(t *testing.T) {
+	body := strings.Repeat("hello world ", 1000)
+	r, sc := wrapForCaptcha(strings.NewReader(body), "text/html", "")
+	if _, err := io.ReadAll(r); err != nil {
+		t.Fatal(err)
+	}
+	if got := sc.Kind(); got != "" {
+		t.Fatalf("false positive: %q", got)
+	}
+}
+
+func TestCaptchaScanner_FirstHitWins(t *testing.T) {
+	body := `<div class="g-recaptcha"></div><div class="cf-turnstile"></div>`
+	r, sc := wrapForCaptcha(strings.NewReader(body), "text/html", "")
+	if _, err := io.ReadAll(r); err != nil {
+		t.Fatal(err)
+	}
+	if got := sc.Kind(); got != "recaptcha" {
+		t.Fatalf("got %q want recaptcha", got)
+	}
+}
+
+// slowReader returns at most `step` bytes per Read; used to force chunk boundaries.
+type slowReader struct {
+	src  io.Reader
+	step int
+}
+
+func (s slowReader) Read(p []byte) (int, error) {
+	if s.step > 0 && len(p) > s.step {
+		p = p[:s.step]
+	}
+	return s.src.Read(p)
 }

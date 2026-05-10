@@ -1,6 +1,10 @@
 package core
 
-import "bytes"
+import (
+	"bytes"
+	"io"
+	"strings"
+)
 
 // captchaSignature pairs a vendor name with byte fingerprints whose presence
 // in a response body indicates a captcha challenge of that vendor.
@@ -74,5 +78,100 @@ func asciiLowerInPlace(b []byte) {
 		if c >= 'A' && c <= 'Z' {
 			b[i] = c + 32
 		}
+	}
+}
+
+// captchaScannableTypes is the closed list of Content-Type prefixes we scan.
+// Anything else gets a no-op scanner — pass-through with no overhead.
+var captchaScannableTypes = []string{
+	"text/html",
+	"application/xhtml+xml",
+	"text/plain",
+}
+
+// captchaScanner reads from an underlying io.Reader, mirrors each chunk into a
+// rolling matcher, and surfaces the first detected captcha kind via Kind().
+//
+// Bytes returned by Read are byte-for-byte the bytes returned by the underlying
+// reader. The scanner never mutates, buffers, or delays the body — failure to
+// detect must never affect the response stream.
+type captchaScanner struct {
+	src  io.Reader
+	kind string // "" until first match
+	done bool   // true once kind is set OR we decided not to scan
+	tail []byte // last (longestFingerprint-1) bytes seen, to span chunks
+}
+
+// wrapForCaptcha constructs a scanner appropriate for `contentType`. If we
+// shouldn't scan this response, the returned reader is `r` unchanged and the
+// scanner's Kind() always returns "". `contentEncoding` is reserved for a
+// future task that adds gzip/deflate support; the parameter is accepted now
+// to keep the public signature stable.
+func wrapForCaptcha(r io.Reader, contentType, contentEncoding string) (io.Reader, *captchaScanner) {
+	_ = contentEncoding // consumed by a future task
+	if !shouldScanContentType(contentType) {
+		return r, &captchaScanner{done: true}
+	}
+	sc := &captchaScanner{src: r}
+	return sc, sc
+}
+
+// shouldScanContentType reports whether ct's prefix (before any ';') matches
+// one of captchaScannableTypes. Comparison is case-insensitive.
+func shouldScanContentType(ct string) bool {
+	if ct == "" {
+		return false
+	}
+	if i := strings.IndexByte(ct, ';'); i >= 0 {
+		ct = ct[:i]
+	}
+	ct = strings.ToLower(strings.TrimSpace(ct))
+	for _, t := range captchaScannableTypes {
+		if strings.HasPrefix(ct, t) {
+			return true
+		}
+	}
+	return false
+}
+
+// Kind returns the matched captcha kind ("" if none yet / never).
+func (s *captchaScanner) Kind() string { return s.kind }
+
+// Read forwards to the underlying reader, then mirrors the chunk into the
+// matcher. Bytes are not mutated.
+func (s *captchaScanner) Read(p []byte) (int, error) {
+	n, err := s.src.Read(p)
+	if n > 0 && !s.done {
+		s.scanRaw(p[:n])
+	}
+	return n, err
+}
+
+// scanRaw runs the matcher over the chunk plus the carried-over tail buffer.
+// On a hit, it disengages further scanning. Otherwise it refreshes the tail
+// buffer to the last (longestFingerprint-1) bytes so a fingerprint that
+// straddles a chunk boundary still matches on the next call.
+func (s *captchaScanner) scanRaw(chunk []byte) {
+	if len(chunk) == 0 {
+		return
+	}
+	span := chunk
+	if len(s.tail) > 0 {
+		span = append(append([]byte(nil), s.tail...), chunk...)
+	}
+	if k := captchaMatchAll(append([]byte(nil), span...)); k != "" {
+		s.kind = k
+		s.done = true
+		s.tail = nil
+		return
+	}
+	keep := captchaLongestFingerprint - 1
+	if keep < 0 {
+		keep = 0
+	}
+	if len(span) > keep {
+		s.tail = append(s.tail[:0], span[len(span)-keep:]...)
+	} else {
+		s.tail = append(s.tail[:0], span...)
 	}
 }
