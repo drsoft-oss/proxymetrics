@@ -64,6 +64,7 @@ func dimensionsHandler(s store.Store) http.HandlerFunc {
 			"team":         nullableSlice(dims.Teams),
 			"project":      nullableSlice(dims.Projects),
 			"status_class": dims.StatusClasses,
+			"captcha_kind": dims.CaptchaKinds,
 			"profile_id":   profiles,
 		}
 
