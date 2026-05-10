@@ -12,6 +12,7 @@ type EventFilter struct {
 	Teams         []string
 	Projects      []string
 	StatusClasses []string
+	CaptchaKinds  []string
 	StatusCodes   []int
 	TargetHost    string
 	Q             string
@@ -30,6 +31,7 @@ type RollupFilter struct {
 	Teams         []string
 	Projects      []string
 	StatusClasses []string
+	CaptchaKinds  []string
 	TargetHost    string
 	Q             string
 	Sort, Order   string
@@ -47,6 +49,7 @@ type RollupRow struct {
 	TargetHost    string
 	Team          string
 	Project       string
+	CaptchaKind   string
 	RequestCount  int64
 	BytesInTotal  int64
 	BytesOutTotal int64

@@ -39,6 +39,7 @@ type Event struct {
 	CostUSD        float64
 	Team           string
 	Project        string
+	CaptchaKind    string // "" = not measured; otherwise: recaptcha|turnstile|hcaptcha|datadome|arkose
 }
 
 // TailOptions filters TailEvents.
@@ -57,6 +58,7 @@ type DimensionsResult struct {
 	Teams         []string
 	Projects      []string
 	StatusClasses []string // always {"2xx","3xx","4xx","5xx"} regardless of data
+	CaptchaKinds  []string // always {"recaptcha","turnstile","hcaptcha","datadome","arkose"} regardless of data
 	Profiles      []DimensionProfile
 }
 
