@@ -76,6 +76,10 @@ func runMigrations(db *sql.DB) error {
 		{"audit_runs", "session_key", `ALTER TABLE audit_runs ADD COLUMN session_key TEXT`},
 		{"audit_runs", "unique_ip_count", `ALTER TABLE audit_runs ADD COLUMN unique_ip_count INTEGER`},
 		{"audit_requests", "attempts", `ALTER TABLE audit_requests ADD COLUMN attempts INTEGER DEFAULT 1`},
+		{"events", "captcha_kind", `ALTER TABLE events ADD COLUMN captcha_kind TEXT NOT NULL DEFAULT ''`},
+		{"rollups_1min", "captcha_kind", `ALTER TABLE rollups_1min ADD COLUMN captcha_kind TEXT NOT NULL DEFAULT ''`},
+		{"rollups_1hour", "captcha_kind", `ALTER TABLE rollups_1hour ADD COLUMN captcha_kind TEXT NOT NULL DEFAULT ''`},
+		{"rollups_1day", "captcha_kind", `ALTER TABLE rollups_1day ADD COLUMN captcha_kind TEXT NOT NULL DEFAULT ''`},
 	}
 	for _, a := range adds {
 		has, err := tableHasColumn(db, a.table, a.column)

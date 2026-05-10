@@ -87,3 +87,39 @@ func TestSchema_AuditRuns_HasSessionRotationColumns(t *testing.T) {
 		}
 	}
 }
+
+func TestSchema_MigratesCaptchaKindColumn(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "old.db")
+
+	s, err := Open(path)
+	if err != nil {
+		t.Fatalf("first open: %v", err)
+	}
+	// Simulate a pre-migration DB: drop captcha_kind on each affected table.
+	for _, table := range []string{"events", "rollups_1min", "rollups_1hour", "rollups_1day"} {
+		if _, err := s.db.Exec(`ALTER TABLE ` + table + ` DROP COLUMN captcha_kind`); err != nil {
+			t.Fatalf("drop %s.captcha_kind: %v", table, err)
+		}
+	}
+	if err := s.Close(); err != nil {
+		t.Fatalf("close: %v", err)
+	}
+
+	s2, err := Open(path)
+	if err != nil {
+		t.Fatalf("reopen: %v", err)
+	}
+	defer s2.Close()
+	for _, table := range []string{"events", "rollups_1min", "rollups_1hour", "rollups_1day"} {
+		var n int
+		if err := s2.db.QueryRow(
+			`SELECT COUNT(*) FROM pragma_table_info(?) WHERE name = 'captcha_kind'`, table,
+		).Scan(&n); err != nil {
+			t.Fatalf("query %s: %v", table, err)
+		}
+		if n != 1 {
+			t.Fatalf("%s.captcha_kind missing after migration", table)
+		}
+	}
+}
