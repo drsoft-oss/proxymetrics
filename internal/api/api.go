@@ -40,6 +40,14 @@ func Register(mux *http.ServeMux, s store.Store, b *broadcaster.Broadcaster, dep
 		}
 		statusCodeDetailHandler(s)(w, r)
 	})
+	mux.HandleFunc("/api/v1/captchas", captchasHandler(s))
+	mux.HandleFunc("/api/v1/captchas/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/v1/captchas/distribution" {
+			captchaDistributionHandler(s)(w, r)
+			return
+		}
+		captchaDetailHandler(s)(w, r)
+	})
 	mux.HandleFunc("/api/v1/sessions/active", sessionsActiveHandler())
 	mux.HandleFunc("/api/v1/dimensions", dimensionsHandler(s))
 }
