@@ -1,6 +1,8 @@
 package core
 
 import (
+	"bytes"
+	"compress/gzip"
 	"io"
 	"strings"
 	"testing"
@@ -74,6 +76,35 @@ func TestCaptchaScanner_FirstHitWins(t *testing.T) {
 	}
 	if got := sc.Kind(); got != "recaptcha" {
 		t.Fatalf("got %q want recaptcha", got)
+	}
+}
+
+func TestCaptchaScanner_GzipBody(t *testing.T) {
+	var buf bytes.Buffer
+	gw := gzip.NewWriter(&buf)
+	if _, err := gw.Write([]byte(`<div class="g-recaptcha"></div>`)); err != nil {
+		t.Fatal(err)
+	}
+	_ = gw.Close()
+
+	r, sc := wrapForCaptcha(bytes.NewReader(buf.Bytes()), "text/html", "gzip")
+	if _, err := io.ReadAll(r); err != nil {
+		t.Fatal(err)
+	}
+	if got := sc.Kind(); got != "recaptcha" {
+		t.Fatalf("got %q want recaptcha", got)
+	}
+}
+
+func TestCaptchaScanner_PassthroughBytesUnchanged(t *testing.T) {
+	body := `<html><body><div class="g-recaptcha"></div></body></html>`
+	r, _ := wrapForCaptcha(strings.NewReader(body), "text/html", "")
+	got, err := io.ReadAll(r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != body {
+		t.Fatalf("body mutated:\n got: %q\nwant: %q", got, body)
 	}
 }
 

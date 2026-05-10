@@ -2,6 +2,8 @@ package core
 
 import (
 	"bytes"
+	"compress/flate"
+	"compress/gzip"
 	"io"
 	"strings"
 )
@@ -96,24 +98,40 @@ var captchaScannableTypes = []string{
 // reader. The scanner never mutates, buffers, or delays the body — failure to
 // detect must never affect the response stream.
 type captchaScanner struct {
-	src  io.Reader
-	kind string // "" until first match
-	done bool   // true once kind is set OR we decided not to scan
-	tail []byte // last (longestFingerprint-1) bytes seen, to span chunks
+	src    io.Reader
+	decode func(io.Reader) (io.Reader, error)
+	kind   string // "" until first match
+	done   bool   // true once kind is set OR we decided not to scan
+	tail   []byte // last (longestFingerprint-1) bytes seen, to span chunks
 }
 
 // wrapForCaptcha constructs a scanner appropriate for `contentType`. If we
 // shouldn't scan this response, the returned reader is `r` unchanged and the
-// scanner's Kind() always returns "". `contentEncoding` is reserved for a
-// future task that adds gzip/deflate support; the parameter is accepted now
-// to keep the public signature stable.
+// scanner's Kind() always returns "".
 func wrapForCaptcha(r io.Reader, contentType, contentEncoding string) (io.Reader, *captchaScanner) {
-	_ = contentEncoding // consumed by a future task
 	if !shouldScanContentType(contentType) {
 		return r, &captchaScanner{done: true}
 	}
-	sc := &captchaScanner{src: r}
+	sc := &captchaScanner{
+		src:    r,
+		decode: decoderFor(contentEncoding),
+	}
 	return sc, sc
+}
+
+// decoderFor returns a constructor for a streaming decoder appropriate for the
+// given Content-Encoding, or nil if the content should be scanned raw.
+// brotli is intentionally not supported in this phase — `br` bodies fall to
+// the raw-bytes scan path (a documented small accuracy loss to avoid adding a
+// new module dependency).
+func decoderFor(ce string) func(io.Reader) (io.Reader, error) {
+	switch strings.ToLower(strings.TrimSpace(ce)) {
+	case "gzip":
+		return func(r io.Reader) (io.Reader, error) { return gzip.NewReader(r) }
+	case "deflate":
+		return func(r io.Reader) (io.Reader, error) { return flate.NewReader(r), nil }
+	}
+	return nil
 }
 
 // shouldScanContentType reports whether ct's prefix (before any ';') matches
@@ -142,9 +160,37 @@ func (s *captchaScanner) Kind() string { return s.kind }
 func (s *captchaScanner) Read(p []byte) (int, error) {
 	n, err := s.src.Read(p)
 	if n > 0 && !s.done {
-		s.scanRaw(p[:n])
+		s.consume(p[:n])
 	}
 	return n, err
+}
+
+func (s *captchaScanner) consume(chunk []byte) {
+	if s.decode != nil {
+		s.decodeAndScan(chunk)
+		return
+	}
+	s.scanRaw(chunk)
+}
+
+// decodeAndScan opens a fresh decoder over the chunk, reads what it can, and
+// runs scanRaw on the resulting plaintext. If the decoder errors with no
+// usable output, we disable further decoding and fall back to raw scanning —
+// the proxy must never break a request to measure it.
+func (s *captchaScanner) decodeAndScan(chunk []byte) {
+	dec, err := s.decode(bytes.NewReader(chunk))
+	if err != nil {
+		s.decode = nil
+		s.scanRaw(chunk)
+		return
+	}
+	plain, err := io.ReadAll(dec)
+	if err != nil && len(plain) == 0 {
+		s.decode = nil
+		s.scanRaw(chunk)
+		return
+	}
+	s.scanRaw(plain)
 }
 
 // scanRaw runs the matcher over the chunk plus the carried-over tail buffer.
