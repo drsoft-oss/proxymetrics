@@ -121,3 +121,24 @@ type ProfileUsage struct {
 	Requests  int64
 	SpendUSD  float64
 }
+
+// CaptchaKindDetailResult is the aggregate for one captcha kind in a window.
+type CaptchaKindDetailResult struct {
+	Kind         string
+	Requests     int64
+	TopProviders []CaptchaKindDetailProvider
+	TopTargets   []CaptchaKindDetailTarget
+}
+
+// CaptchaKindDetailProvider is one entry in CaptchaKindDetailResult.TopProviders.
+type CaptchaKindDetailProvider struct {
+	Vendor   string
+	Type     string
+	Requests int64
+}
+
+// CaptchaKindDetailTarget is one entry in CaptchaKindDetailResult.TopTargets.
+type CaptchaKindDetailTarget struct {
+	Host     string
+	Requests int64
+}

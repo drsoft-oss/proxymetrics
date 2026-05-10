@@ -317,6 +317,71 @@ func (s *Store) StatusCodeDetail(ctx context.Context, code int, f store.EventFil
 	return out, nil
 }
 
+func (s *Store) CaptchaKindDetail(ctx context.Context, kind string, f store.EventFilter) (store.CaptchaKindDetailResult, error) {
+	where, args := buildEventWhere(f)
+	where = append(where, "captcha_kind = ?")
+	args = append(args, kind)
+	whereSQL := " WHERE " + strings.Join(where, " AND ")
+
+	var reqs int64
+	if err := s.db.QueryRowContext(ctx,
+		`SELECT COUNT(*) FROM events`+whereSQL, args...,
+	).Scan(&reqs); err != nil {
+		return store.CaptchaKindDetailResult{}, fmt.Errorf("captcha detail count: %w", err)
+	}
+	if reqs == 0 {
+		return store.CaptchaKindDetailResult{}, store.ErrNotFound
+	}
+
+	out := store.CaptchaKindDetailResult{Kind: kind, Requests: reqs}
+
+	qp := `SELECT vendor, type, COUNT(*)
+	       FROM events` + whereSQL + `
+	       GROUP BY vendor, type
+	       ORDER BY 3 DESC
+	       LIMIT 5`
+	rp, err := s.db.QueryContext(ctx, qp, args...)
+	if err != nil {
+		return store.CaptchaKindDetailResult{}, fmt.Errorf("captcha detail providers: %w", err)
+	}
+	for rp.Next() {
+		var p store.CaptchaKindDetailProvider
+		if err := rp.Scan(&p.Vendor, &p.Type, &p.Requests); err != nil {
+			rp.Close()
+			return store.CaptchaKindDetailResult{}, err
+		}
+		out.TopProviders = append(out.TopProviders, p)
+	}
+	rp.Close()
+	if err := rp.Err(); err != nil {
+		return store.CaptchaKindDetailResult{}, err
+	}
+
+	qt := `SELECT target_host, COUNT(*)
+	       FROM events` + whereSQL + `
+	         AND target_host IS NOT NULL AND target_host != ''
+	       GROUP BY target_host
+	       ORDER BY 2 DESC
+	       LIMIT 5`
+	rt, err := s.db.QueryContext(ctx, qt, args...)
+	if err != nil {
+		return store.CaptchaKindDetailResult{}, fmt.Errorf("captcha detail targets: %w", err)
+	}
+	for rt.Next() {
+		var t store.CaptchaKindDetailTarget
+		if err := rt.Scan(&t.Host, &t.Requests); err != nil {
+			rt.Close()
+			return store.CaptchaKindDetailResult{}, err
+		}
+		out.TopTargets = append(out.TopTargets, t)
+	}
+	rt.Close()
+	if err := rt.Err(); err != nil {
+		return store.CaptchaKindDetailResult{}, err
+	}
+	return out, nil
+}
+
 func (s *Store) RequestsByHour(ctx context.Context, groupBy string, now time.Time) ([]store.RequestsByHourBucket, error) {
 	switch groupBy {
 	case "profile_id", "target_host":

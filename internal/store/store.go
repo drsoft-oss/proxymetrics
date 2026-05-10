@@ -44,6 +44,11 @@ type Store interface {
 	// Returns ErrNotFound if the code has no events in the filter window.
 	StatusCodeDetail(ctx context.Context, code int, f EventFilter) (StatusCodeDetailResult, error)
 
+	// CaptchaKindDetail returns aggregate metrics for one captcha kind, plus its
+	// top 5 providers and top 5 targets. Returns ErrNotFound if the kind has no
+	// events in the filter window.
+	CaptchaKindDetail(ctx context.Context, kind string, f EventFilter) (CaptchaKindDetailResult, error)
+
 	// RequestsByHour returns trailing-24h request counts in 1-hour buckets,
 	// grouped by the chosen dimension. groupBy must be either "profile_id" or
 	// "target_host". `now` defines the trailing window's right edge.
