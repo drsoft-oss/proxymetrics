@@ -28,7 +28,7 @@ const rollupColumns = `ts_bucket, profile_id, vendor, type, region, status_class
 	target_host, team, project,
 	request_count, bytes_in_total, bytes_out_total,
 	latency_ms_avg, latency_ms_p50, latency_ms_p95, latency_ms_p99,
-	cost_usd_total, success_count, failure_count`
+	cost_usd_total, success_count, failure_count, captcha_kind`
 
 func (s *Store) WriteRollups(ctx context.Context, level string, batch []store.RollupRow) error {
 	if len(batch) == 0 {
@@ -46,7 +46,7 @@ func (s *Store) WriteRollups(ctx context.Context, level string, batch []store.Ro
 	defer func() { _ = tx.Rollback() }()
 
 	stmt, err := tx.PrepareContext(ctx, `INSERT INTO `+table+` (`+rollupColumns+`)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 	if err != nil {
 		return fmt.Errorf("rollups prepare: %w", err)
 	}
@@ -58,7 +58,7 @@ func (s *Store) WriteRollups(ctx context.Context, level string, batch []store.Ro
 			r.StatusClass, nilIfEmpty(r.TargetHost), nilIfEmpty(r.Team), nilIfEmpty(r.Project),
 			r.RequestCount, r.BytesInTotal, r.BytesOutTotal,
 			r.LatencyMSAvg, nullableInt(r.LatencyMSP50), nullableInt(r.LatencyMSP95), nullableInt(r.LatencyMSP99),
-			r.CostUSDTotal, r.SuccessCount, r.FailureCount,
+			r.CostUSDTotal, r.SuccessCount, r.FailureCount, r.CaptchaKind,
 		); err != nil {
 			return fmt.Errorf("rollups insert: %w", err)
 		}
@@ -110,6 +110,7 @@ func (s *Store) QueryRollups(ctx context.Context, f store.RollupFilter) ([]store
 		{"team", f.Teams},
 		{"project", f.Projects},
 		{"status_class", f.StatusClasses},
+		{"captcha_kind", f.CaptchaKinds},
 	} {
 		if len(w.vals) == 0 {
 			continue
@@ -169,7 +170,7 @@ func (s *Store) QueryRollups(ctx context.Context, f store.RollupFilter) ([]store
 			&r.StatusClass, &targetHost, &team, &project,
 			&r.RequestCount, &r.BytesInTotal, &r.BytesOutTotal,
 			&r.LatencyMSAvg, &p50, &p95, &p99,
-			&r.CostUSDTotal, &r.SuccessCount, &r.FailureCount,
+			&r.CostUSDTotal, &r.SuccessCount, &r.FailureCount, &r.CaptchaKind,
 		); err != nil {
 			return nil, err
 		}
