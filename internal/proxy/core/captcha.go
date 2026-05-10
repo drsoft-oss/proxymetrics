@@ -43,6 +43,18 @@ var captchaSignatures = []captchaSignature{
 	}},
 }
 
+// CaptchaKinds is the canonical closed enumeration of detected captcha
+// vendor names, derived from the signature table. This is the single
+// source of truth for which kinds the system recognizes — the API layer
+// uses it for filter validation and the /dimensions response.
+var CaptchaKinds = func() []string {
+	out := make([]string, 0, len(captchaSignatures))
+	for _, sig := range captchaSignatures {
+		out = append(out, sig.Kind)
+	}
+	return out
+}()
+
 // captchaLongestFingerprint sizes the tail buffer used by the streaming
 // scanner so that signatures spanning a chunk boundary still match.
 var captchaLongestFingerprint = func() int {

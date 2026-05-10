@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/drsoft-oss/proxymetrics/internal/proxy/core"
 	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
@@ -64,7 +65,7 @@ func dimensionsHandler(s store.Store) http.HandlerFunc {
 			"team":         nullableSlice(dims.Teams),
 			"project":      nullableSlice(dims.Projects),
 			"status_class": dims.StatusClasses,
-			"captcha_kind": dims.CaptchaKinds,
+			"captcha_kind": core.CaptchaKinds,
 			"profile_id":   profiles,
 		}
 

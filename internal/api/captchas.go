@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/drsoft-oss/proxymetrics/internal/proxy/core"
 	"github.com/drsoft-oss/proxymetrics/internal/store"
 )
 
@@ -106,9 +107,9 @@ func captchaDistributionHandler(s store.Store) http.HandlerFunc {
 
 // captchaDetailHandler is the drill endpoint: GET /api/v1/captchas/{kind}.
 func captchaDetailHandler(s store.Store) http.HandlerFunc {
-	valid := map[string]bool{
-		"recaptcha": true, "turnstile": true, "hcaptcha": true,
-		"datadome": true, "arkose": true,
+	valid := make(map[string]bool, len(core.CaptchaKinds))
+	for _, k := range core.CaptchaKinds {
+		valid[k] = true
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		kind := strings.TrimPrefix(r.URL.Path, "/api/v1/captchas/")
