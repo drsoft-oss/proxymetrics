@@ -146,6 +146,25 @@ func TestCaptchaScanner_AcceptsScannableTypes(t *testing.T) {
 	}
 }
 
+func TestCaptchaScanner_PanicDegradesToPassthrough(t *testing.T) {
+	orig := captchaPanicHook
+	captchaPanicHook = func() { panic("boom") }
+	t.Cleanup(func() { captchaPanicHook = orig })
+
+	body := `<html><body>hello</body></html>`
+	r, sc := wrapForCaptcha(strings.NewReader(body), "text/html", "")
+	got, err := io.ReadAll(r)
+	if err != nil {
+		t.Fatalf("body read failed after matcher panic: %v", err)
+	}
+	if string(got) != body {
+		t.Fatalf("body mutated after panic")
+	}
+	if k := sc.Kind(); k != "" {
+		t.Fatalf("kind set despite panic: %q", k)
+	}
+}
+
 // slowReader returns at most `step` bytes per Read; used to force chunk boundaries.
 type slowReader struct {
 	src  io.Reader

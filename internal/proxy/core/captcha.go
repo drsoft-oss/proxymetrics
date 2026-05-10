@@ -83,6 +83,10 @@ func asciiLowerInPlace(b []byte) {
 	}
 }
 
+// captchaPanicHook is a hook used only by tests to force a panic inside the
+// matcher. Production builds leave it nil and the call is elided.
+var captchaPanicHook func()
+
 // captchaScannableTypes is the closed list of Content-Type prefixes we scan.
 // Anything else gets a no-op scanner — pass-through with no overhead.
 var captchaScannableTypes = []string{
@@ -166,6 +170,11 @@ func (s *captchaScanner) Read(p []byte) (int, error) {
 }
 
 func (s *captchaScanner) consume(chunk []byte) {
+	defer func() {
+		if r := recover(); r != nil {
+			s.done = true
+		}
+	}()
 	if s.decode != nil {
 		s.decodeAndScan(chunk)
 		return
@@ -204,6 +213,9 @@ func (s *captchaScanner) scanRaw(chunk []byte) {
 	span := chunk
 	if len(s.tail) > 0 {
 		span = append(append([]byte(nil), s.tail...), chunk...)
+	}
+	if captchaPanicHook != nil {
+		captchaPanicHook()
 	}
 	if k := captchaMatchAll(append([]byte(nil), span...)); k != "" {
 		s.kind = k
