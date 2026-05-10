@@ -127,6 +127,7 @@ export type EventRow = {
   cost_usd: number;
   team?: string;
   project?: string;
+  captcha_kind?: CaptchaKind | "";
 };
 
 export type EventsResponse = {
@@ -154,6 +155,7 @@ export type DimensionsResponse = {
   team: string[];
   project: string[];
   status_class: string[];
+  captcha_kind: string[];
   profile_id: { id: string; name: string }[];
 };
 
@@ -250,4 +252,43 @@ export type TargetDetailResponse = {
   from: string;
   to: string;
   source: "events" | "rollups_1hour" | "rollups_1day";
+};
+
+export type CaptchaKind = "recaptcha" | "turnstile" | "hcaptcha" | "datadome" | "arkose";
+
+export const CAPTCHA_KINDS: CaptchaKind[] = ["recaptcha", "turnstile", "hcaptcha", "datadome", "arkose"];
+
+export type CaptchaRow = {
+  vendor: string;
+  type: string;
+  total: number;
+  by_kind: Partial<Record<CaptchaKind, number>>;
+};
+
+export type CaptchasResponse = {
+  rows: CaptchaRow[];
+  from: string;
+  to: string;
+  source: "events" | "rollups_1hour" | "rollups_1day";
+};
+
+export type CaptchaDistributionItem = { kind: CaptchaKind; requests: number };
+
+export type CaptchaDistributionResponse = {
+  items: CaptchaDistributionItem[];
+  from: string;
+  to: string;
+  source: "events" | "rollups_1hour" | "rollups_1day";
+};
+
+export type CaptchaDetailProvider = { vendor: string; type: string; requests: number };
+export type CaptchaDetailTarget = { host: string; requests: number };
+
+export type CaptchaDetailResponse = {
+  kind: CaptchaKind;
+  requests: number;
+  top_providers: CaptchaDetailProvider[];
+  top_targets: CaptchaDetailTarget[];
+  from: string;
+  to: string;
 };
