@@ -417,3 +417,9 @@ The audit module's IP geolocation and ASN classification is powered by:
   `GeoLite2-City.mmdb` and `GeoLite2-Connection-Type.mmdb` into `data/maxmind/`
   to enable. This product includes GeoLite2 data created by MaxMind, available
   from [maxmind.com](https://www.maxmind.com).
+
+<p align="center">
+  <a href="https://www.anonymous-proxies.net?utm_source=github&utm_medium=banner&utm_campaign=proxymetrics" target="_blank" rel="noopener noreferrer">
+    <img src="banner.svg" alt="proxybench banner" width="768" />
+  </a>
+</p>
