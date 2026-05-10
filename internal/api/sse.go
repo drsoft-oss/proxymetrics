@@ -75,5 +75,6 @@ func eventEnvelope(e store.Event) map[string]any {
 		"cost_usd":         e.CostUSD,
 		"team":             e.Team,
 		"project":          e.Project,
+		"captcha_kind":     e.CaptchaKind,
 	}
 }
