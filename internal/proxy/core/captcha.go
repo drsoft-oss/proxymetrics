@@ -95,6 +95,8 @@ var captchaScannableTypes = []string{
 	"text/plain",
 }
 
+const captchaMaxEncBuf = 256 * 1024 // ~enough for any captcha challenge HTML
+
 // captchaScanner reads from an underlying io.Reader, mirrors each chunk into a
 // rolling matcher, and surfaces the first detected captcha kind via Kind().
 //
@@ -107,6 +109,7 @@ type captchaScanner struct {
 	kind   string // "" until first match
 	done   bool   // true once kind is set OR we decided not to scan
 	tail   []byte // last (longestFingerprint-1) bytes seen, to span chunks
+	encBuf []byte // accumulated encoded bytes pending a single-shot decode
 }
 
 // wrapForCaptcha constructs a scanner appropriate for `contentType`. If we
@@ -166,6 +169,9 @@ func (s *captchaScanner) Read(p []byte) (int, error) {
 	if n > 0 && !s.done {
 		s.consume(p[:n])
 	}
+	if err == io.EOF && !s.done && s.decode != nil && len(s.encBuf) > 0 {
+		s.flushDecoded()
+	}
 	return n, err
 }
 
@@ -176,27 +182,40 @@ func (s *captchaScanner) consume(chunk []byte) {
 		}
 	}()
 	if s.decode != nil {
-		s.decodeAndScan(chunk)
+		// Buffer for a single end-of-stream decode; bail to raw if the cap is hit.
+		if len(s.encBuf)+len(chunk) > captchaMaxEncBuf {
+			s.flushDecoded()
+			return
+		}
+		s.encBuf = append(s.encBuf, chunk...)
 		return
 	}
 	s.scanRaw(chunk)
 }
 
-// decodeAndScan opens a fresh decoder over the chunk, reads what it can, and
-// runs scanRaw on the resulting plaintext. If the decoder errors with no
-// usable output, we disable further decoding and fall back to raw scanning —
-// the proxy must never break a request to measure it.
-func (s *captchaScanner) decodeAndScan(chunk []byte) {
-	dec, err := s.decode(bytes.NewReader(chunk))
+// flushDecoded opens the decoder ONCE over everything we've buffered so far,
+// scans the resulting plaintext, and disengages the scanner. Called on
+// upstream EOF or when the encoded buffer hits its cap. On any decoder
+// error, we fall back to raw scanning of the buffer so we still get a
+// best-effort match (and never break the body — the proxy passthrough is
+// independent of this code path).
+func (s *captchaScanner) flushDecoded() {
+	defer func() {
+		recover()
+		s.encBuf = nil
+		s.done = true
+	}()
+	if s.decode == nil || len(s.encBuf) == 0 {
+		return
+	}
+	dec, err := s.decode(bytes.NewReader(s.encBuf))
 	if err != nil {
-		s.decode = nil
-		s.scanRaw(chunk)
+		s.scanRaw(s.encBuf)
 		return
 	}
 	plain, err := io.ReadAll(dec)
 	if err != nil && len(plain) == 0 {
-		s.decode = nil
-		s.scanRaw(chunk)
+		s.scanRaw(s.encBuf)
 		return
 	}
 	s.scanRaw(plain)

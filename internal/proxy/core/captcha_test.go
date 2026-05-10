@@ -165,6 +165,24 @@ func TestCaptchaScanner_PanicDegradesToPassthrough(t *testing.T) {
 	}
 }
 
+func TestCaptchaScanner_GzipMultiChunk(t *testing.T) {
+	var buf bytes.Buffer
+	gw := gzip.NewWriter(&buf)
+	if _, err := gw.Write([]byte(`<div class="g-recaptcha"></div><html>` + strings.Repeat(" ", 10000) + `</html>`)); err != nil {
+		t.Fatal(err)
+	}
+	_ = gw.Close()
+
+	// 1-byte chunks force the scanner to receive the gzip stream piecemeal.
+	r, sc := wrapForCaptcha(slowReader{src: bytes.NewReader(buf.Bytes()), step: 1}, "text/html", "gzip")
+	if _, err := io.ReadAll(r); err != nil {
+		t.Fatal(err)
+	}
+	if got := sc.Kind(); got != "recaptcha" {
+		t.Fatalf("got %q want recaptcha (multi-chunk gzip should still detect)", got)
+	}
+}
+
 // slowReader returns at most `step` bytes per Read; used to force chunk boundaries.
 type slowReader struct {
 	src  io.Reader
