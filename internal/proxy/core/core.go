@@ -71,8 +71,9 @@ type tracker struct {
 	bytesOut   atomic.Int64
 	host       string
 	pathHash   string
-	cfg        *Config
-	emitted    atomic.Bool
+	cfg         *Config
+	emitted     atomic.Bool
+	captchaKind string // set by the captcha scanner's onClose; "" if not measured
 }
 
 // New returns a configured *goproxy.ProxyHttpServer ready to serve.
@@ -337,6 +338,7 @@ func (t *tracker) emit(errClass error) {
 		CostUSD:        cost,
 		Team:           t.team,
 		Project:        t.project,
+		CaptchaKind:    t.captchaKind,
 	}
 	t.cfg.Emitter.Submit(event)
 	if t.cfg.Broadcaster != nil {
