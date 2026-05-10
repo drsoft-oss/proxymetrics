@@ -420,6 +420,6 @@ The audit module's IP geolocation and ASN classification is powered by:
 
 <p align="center">
   <a href="https://www.anonymous-proxies.net?utm_source=github&utm_medium=banner&utm_campaign=proxymetrics" target="_blank" rel="noopener noreferrer">
-    <img src="banner.svg" alt="proxybench banner" width="768" />
+    <img src="banner.svg" alt="ProxyMetrics banner" width="768" />
   </a>
 </p>
