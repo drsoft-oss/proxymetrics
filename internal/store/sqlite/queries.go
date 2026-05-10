@@ -103,6 +103,7 @@ func buildEventWhere(f store.EventFilter) ([]string, []any) {
 		{"team", f.Teams},
 		{"project", f.Projects},
 		{"status_class", f.StatusClasses},
+		{"captcha_kind", f.CaptchaKinds},
 	} {
 		if len(w.vals) == 0 {
 			continue
@@ -351,6 +352,7 @@ func (s *Store) RequestsByHour(ctx context.Context, groupBy string, now time.Tim
 func (s *Store) DistinctDimensions(ctx context.Context, from, to time.Time) (store.DimensionsResult, error) {
 	out := store.DimensionsResult{
 		StatusClasses: []string{"2xx", "3xx", "4xx", "5xx"},
+		CaptchaKinds:  []string{"recaptcha", "turnstile", "hcaptcha", "datadome", "arkose"},
 	}
 
 	cols := []struct {
