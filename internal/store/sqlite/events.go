@@ -11,7 +11,7 @@ import (
 
 const eventColumns = `ts, request_id, profile_id, vendor, type, region,
 	target_host, target_path_hash, status_code, status_class,
-	bytes_in, bytes_out, latency_ms, cost_usd, team, project`
+	bytes_in, bytes_out, latency_ms, cost_usd, team, project, captcha_kind`
 
 func (s *Store) WriteEvents(ctx context.Context, batch []store.Event) error {
 	if len(batch) == 0 {
@@ -25,7 +25,7 @@ func (s *Store) WriteEvents(ctx context.Context, batch []store.Event) error {
 
 	stmt, err := tx.PrepareContext(ctx, `
 		INSERT INTO events (`+eventColumns+`)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 	if err != nil {
 		return fmt.Errorf("events prepare: %w", err)
 	}
@@ -38,6 +38,7 @@ func (s *Store) WriteEvents(ctx context.Context, batch []store.Event) error {
 			nullableInt(e.StatusCode), e.StatusClass,
 			e.BytesIn, e.BytesOut, e.LatencyMS, e.CostUSD,
 			nilIfEmpty(e.Team), nilIfEmpty(e.Project),
+			e.CaptchaKind,
 		); err != nil {
 			return fmt.Errorf("events insert: %w", err)
 		}
@@ -75,6 +76,7 @@ func (s *Store) TailEvents(ctx context.Context, opts store.TailOptions) ([]store
 			&targetHost, &targetPathHash, &status, &e.StatusClass,
 			&e.BytesIn, &e.BytesOut, &e.LatencyMS, &e.CostUSD,
 			&team, &project,
+			&e.CaptchaKind,
 		); err != nil {
 			return nil, err
 		}

@@ -62,6 +62,7 @@ func (s *Store) QueryEvents(ctx context.Context, f store.EventFilter) ([]store.E
 			&targetHost, &targetPathHash, &status, &e.StatusClass,
 			&e.BytesIn, &e.BytesOut, &e.LatencyMS, &e.CostUSD,
 			&team, &project,
+			&e.CaptchaKind,
 		); err != nil {
 			return nil, 0, err
 		}
